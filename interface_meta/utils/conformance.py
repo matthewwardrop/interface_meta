@@ -107,3 +107,15 @@ def check_signatures_compatible(sig, ref_sig):
             return False
 
     return True
+
+
+def verify_not_override(key, name, value, raise_on_violation=False):
+
+    if inspect.isdatadescriptor(value) and type(value) in (property, abstractproperty):
+        value = value.fget
+
+    if isfunction(value) and getattr(value, '__override__', False):
+        report_violation(
+            "`{name}.{key}` claims to override interface method, but no such method exists.".format(name=name, key=key),
+            raise_on_violation=raise_on_violation
+        )

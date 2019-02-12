@@ -1,6 +1,6 @@
 from abc import ABCMeta
 
-from .utils.conformance import verify_conformance
+from .utils.conformance import verify_conformance, verify_not_override
 from .utils.docs import update_docs
 
 
@@ -31,16 +31,21 @@ class InterfaceMeta(ABCMeta):
                 continue
 
             # Identify the first instance of this key in the MRO, if it exists, and check conformance
+            is_override = False
             for base in bases:
                 if base is object:
                     continue
                 if hasattr(base, key):
+                    is_override = True
                     mcls.__verify_conformance(
                         key, name, value, base.__name__, getattr(base, key),
                         explicit_overrides=explicit_overrides,
                         raise_on_violation=raise_on_violation
                     )
                     break
+
+            if not is_override:
+                verify_not_override(key, name, value, raise_on_violation=raise_on_violation)
 
         return ABCMeta.__new__(mcls, name, bases, dct)
 
