@@ -2,79 +2,103 @@ import inspect
 import logging
 from abc import abstractproperty
 
+from .inspection import (
+    has_explicit_override, is_method, is_functional_member,
+    get_functional_signature, has_forced_override, member_type_understood
+)
 from .reporting import report_violation
 
 try:
-    from inspect import signature, Parameter, _empty
-except ImportError:
-    from funcsigs import signature, Parameter, _empty
+    from inspect import Parameter, _empty
+except ImportError:  # pragma: no cover
+    from funcsigs import Parameter, _empty
 
 
-def isfunction(member):
-    return inspect.isfunction(member) or inspect.ismethod(member)
-
-
-def verify_conformance(key, name, value, base_name, base_value,
+def verify_conformance(name, clsname, member, ref_clsname, ref_member,
                        explicit_overrides=True, raise_on_violation=False):
+    """
+    Verify that a member conforms to a nominated interface.
 
-    if hasattr(base_value, '__objclass__'):  # Method is attached to metaclass, so should not be checked.
+    Args:
+        name (str): The name of the member method being checked.
+        clsname (str): The name of the class parent of the checked member.
+        member (object): The class member to check for conformance against
+            ref_member.
+        ref_clsname (str): The name of the reference class to be treated as an
+            interface.
+        ref_member (object): The referece member to be treated as an interface
+            definition.
+        explicit_overrides (bool): Whether to require explicit overrides.
+            (default: True)
+        raise_on_violation (bool): Whether any non-conformance should cause an
+            exception to be raised. (default: False)
+    """
+    if hasattr(ref_member, '__objclass__'):  # pragma: no cover; Method is attached to metaclass, so should not be checked.
         return
 
-    if inspect.isdatadescriptor(value) and not type(value) in (property, abstractproperty):
-        logging.debug("`interface_meta` does not know how to handle attribute `{}.{}` with type: `{}`. Skipping.".format(name, key, type(value)))
+    if has_forced_override(member):
         return
 
-    if (
-            isfunction(value) and getattr(value, '__override_force__', False)
-            or inspect.isdatadescriptor(value) and getattr(value.fget, '__override_force__', False)
-    ):
+    if not member_type_understood(member):  # pragma: no cover
+        logging.debug("`interface_meta` does not know how to handle attribute `{}.{}` with type: `{}`. Skipping.".format(clsname, name, type(member)))
         return
 
-    # Check that type of value has not changed.
-    if type(value) is not type(base_value):
-        if isfunction(value) and isfunction(base_value):
+    # Check that type of member has not changed.
+    if type(member) is not type(ref_member):
+        if is_method(member) and is_method(ref_member):
             # Python 2 distinguishes between instancemethods and functions
             pass
-        elif type(value) in (abstractproperty, property) and not isfunction(base_value):
+        elif type(member) in (abstractproperty, property) and not is_method(ref_member):
             # This should be okay, provided the property is properly crafted.
             pass
-        elif isfunction(value):
+        elif is_functional_member(member):
+            # This means we are replacing a fixed attribute with a method,
+            # or between different types of functional members
             report_violation(
-                "{}.{} changes the type of {}.{} ({} instead of {}) without using the @override decorator.".format(
-                    name, key, base_name, key, type(value), type(base_value)
+                "{}.{} changes the type of {}.{} ({} instead of {}) without using `@override(force=True)` decorator.".format(
+                    clsname, name, ref_clsname, name, type(member), type(ref_member)
                 ),
                 raise_on_violation
             )
         else:  # Most other type changes should be fine
             pass
 
-    if inspect.isdatadescriptor(value):
-        if explicit_overrides and not getattr(value.fget, '__override__', False):
+    # Check that overrides are present
+    if is_functional_member(member) or inspect.isdatadescriptor(member):
+        if explicit_overrides and not has_explicit_override(member):
             report_violation(
-                "{}.{} overrides interface property {}.{} without using the @override decorator.".format(
-                    name, key, base_name, key
+                "{}.{} overrides interface {}.{} without using the @override decorator.".format(
+                    clsname, name, ref_clsname, name
                 ),
                 raise_on_violation
             )
 
-    elif isfunction(value):
-        if explicit_overrides and not getattr(value, '__override__', False):
-            report_violation(
-                "{}.{} overrides interface method {}.{} without using the @override decorator.".format(
-                    name, key, base_name, key
-                ),
-                raise_on_violation
-            )
-        verify_signature(key, name, value, base_name, base_value, raise_on_violation=raise_on_violation)
+    if is_functional_member(member):
+        verify_signature(name, clsname, member, ref_clsname, ref_member, raise_on_violation=raise_on_violation)
 
 
-def verify_signature(key, name, value, base_name, base_value, raise_on_violation=False):
-    sig = signature(value)
-    base_sig = signature(base_value)
+def verify_signature(name, clsname, member, ref_clsname, ref_member, raise_on_violation=False):
+    """
+    Verify that the signature of a member is compatible with some reference member.
 
-    if not check_signatures_compatible(sig, base_sig):
+    Args:
+        name (str): The name of the member method being checked.
+        clsname (str): The name of the class parent of the checked member.
+        member (object): The class member to check for conformance against
+            ref_member.
+        ref_clsname (str): The name of the reference class to be treated as an
+            interface.
+        ref_member (object): The referece member to be treated as an interface
+            definition.
+        raise_on_violation (bool): Whether any non-conformance should cause an
+            exception to be raised. (default: False)
+    """
+    sig = get_functional_signature(member)
+    ref_sig = get_functional_signature(ref_member)
+
+    if not check_signatures_compatible(sig, ref_sig):
         message = "Signature `{}.{}{}` does not conform to interface `{}.{}{}`.".format(
-            name, key, sig, base_name, key, base_sig
+            clsname, name, sig, ref_clsname, name, ref_sig
         )
         if raise_on_violation:
             raise RuntimeError(message)
@@ -83,6 +107,17 @@ def verify_signature(key, name, value, base_name, base_value, raise_on_violation
 
 
 def check_signatures_compatible(sig, ref_sig):
+    """
+    Check whether two signatures are compatible.
+
+    Args:
+        sig (Signature): A signature of a member to check for compatibility with
+            `ref_sig`.
+        ref_sig (Signature): The reference signature.
+
+    Returns:
+        bool: `True` if the signatures are compatible, and `False` otherwise.
+    """
     params = iter(sig.parameters.values())
     base_params = iter(ref_sig.parameters.values())
 
@@ -109,13 +144,20 @@ def check_signatures_compatible(sig, ref_sig):
     return True
 
 
-def verify_not_override(key, name, value, raise_on_violation=False):
+def verify_not_overridden(name, clsname, member, raise_on_violation=False):
+    """
+    Verify that a nominated member is *not* an override.
 
-    if inspect.isdatadescriptor(value) and type(value) in (property, abstractproperty):
-        value = value.fget
-
-    if isfunction(value) and getattr(value, '__override__', False):
+    Args:
+        name (str): The name of the member method being checked.
+        clsname (str): The name of the class parent of the checked member.
+        member (object): The class member to check for conformance against
+            ref_member.
+        raise_on_violation (bool): Whether any non-conformance should cause an
+            exception to be raised. (default: False)
+    """
+    if has_explicit_override(member):
         report_violation(
-            "`{name}.{key}` claims to override interface method, but no such method exists.".format(name=name, key=key),
+            "`{clsname}.{name}` claims to override interface method, but no such method exists.".format(clsname=clsname, name=name),
             raise_on_violation=raise_on_violation
         )

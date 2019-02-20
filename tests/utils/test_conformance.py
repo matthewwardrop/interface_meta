@@ -2,7 +2,8 @@ import textwrap
 
 import six
 
-from interface_meta.utils.conformance import check_signatures_compatible, signature
+from interface_meta.utils.conformance import check_signatures_compatible
+from interface_meta.utils.inspection import signature
 
 
 def a(a):

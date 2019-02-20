@@ -1,3 +1,8 @@
+import inspect
+
+from .utils.inspection import set_quirk_docs_method, set_quirk_docs_mro
+
+
 def quirk_docs(method=None, mro=True):
     """
     Indicate to `InterfaceMeta` how the wrapped method should be documented.
@@ -29,8 +34,8 @@ def quirk_docs(method=None, mro=True):
         `_quirks_mro` to the method, for interpretation by `InterfaceMeta`.
     """
     def doc_wrapper(f):
-        f._quirks_method = method
-        f._quirks_mro = mro
+        set_quirk_docs_method(f, method)
+        set_quirk_docs_mro(f, mro)
         return f
     return doc_wrapper
 
@@ -44,6 +49,8 @@ def override(f=None, force=False):
 
     Use this decorator as `@override` or `@override(force=True)`.
 
+    A recommended convention is to use this decorator as the outermost decorator.
+
     Args:
         f (function, None): The function, if method is decorated by the decorator
             without arguments (e.g. @override), else None.
@@ -55,13 +62,18 @@ def override(f=None, force=False):
         function: The wrapped function of function wrapper depending on which
             arguments are present.
     """
-    if f is not None:
-        f.__override__ = True
-        f.__override_force__ = force
+    def override(f):
+        annotated = f
+        if inspect.isdatadescriptor(annotated):
+            annotated = f.fget
+        elif inspect.ismethoddescriptor(annotated):
+            annotated = f.__get__(object, object)
+        if isinstance(f, classmethod):
+            annotated = f.__func__
+        annotated.__override__ = True
+        annotated.__override_force__ = force
         return f
-    else:
-        def override(f):
-            f.__override__ = True
-            f.__override_force__ = force
-            return f
-        return override
+
+    if f is not None:
+        return override(f)
+    return override
