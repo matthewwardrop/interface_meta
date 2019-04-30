@@ -42,7 +42,7 @@ such, this library boasts the following features:
 
 ## Example code
 
-```
+```python
 from abc import abstractmethod, abstractproperty
 from six import with_metaclass
 from interface_meta import InterfaceMeta, override, quirk_docs
@@ -113,7 +113,7 @@ class MyImplementation(MyInterface):
 
 Running `help(MyImplementation)` reveals how the documentation is generated:
 
-```
+```python
 class MyImplementation(MyInterface)
  |  This implementation of the example interface works nicely.
  |
