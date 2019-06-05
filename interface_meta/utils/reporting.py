@@ -1,5 +1,7 @@
 import logging
 
+from .errors import InterfaceConformanceError
+
 
 def report_violation(message, raise_on_violation):
     """
@@ -11,6 +13,6 @@ def report_violation(message, raise_on_violation):
             exception to be raised. (default: False)
     """
     if raise_on_violation:
-        raise RuntimeError(message)
+        raise InterfaceConformanceError(message)
     else:
         logging.warning(message)
