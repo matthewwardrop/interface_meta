@@ -135,4 +135,4 @@ def doc_join(*docs):
                 )
         else:
             raise ValueError("Unrecognised doc format: {}".format(type(doc)))
-    return '\n\n'.join(out)
+    return '\n\n'.join(out) or None
