@@ -55,7 +55,7 @@ def verify_conformance(name, clsname, member, ref_clsname, ref_member,
             # This means we are replacing a fixed attribute with a method,
             # or between different types of functional members
             report_violation(
-                "{}.{} changes the type of {}.{} ({} instead of {}) without using `@override(force=True)` decorator.".format(
+                "`{}.{}` changes the type of `{}.{}` (`{}` instead of `{}`) without using `@override(force=True)` decorator.".format(
                     clsname, name, ref_clsname, name, type(member), type(ref_member)
                 ),
                 raise_on_violation
@@ -67,7 +67,7 @@ def verify_conformance(name, clsname, member, ref_clsname, ref_member,
     if is_functional_member(member) or inspect.isdatadescriptor(member):
         if explicit_overrides and not has_explicit_override(member):
             report_violation(
-                "{}.{} overrides interface {}.{} without using the @override decorator.".format(
+                "`{}.{}` overrides interface `{}.{}` without using the `@override` decorator.".format(
                     clsname, name, ref_clsname, name
                 ),
                 raise_on_violation
