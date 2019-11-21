@@ -19,20 +19,14 @@ except ImportError:  # pragma: no cover
 def _get_member(member):
     if inspect.ismethod(member):
         return member.__func__
-    if inspect.isdatadescriptor(member):
+    if inspect.isdatadescriptor(member) and isinstance(member, (property, abstractproperty)):
         return member.fget
-    if isinstance(member, classmethod):
-        return member.__get__(object, object).__func__
     if inspect.ismethoddescriptor(member):
-        return member.__get__(object, object)
+        if isinstance(member, (classmethod, abstractclassmethod)):
+            return member.__get__(object, object).__func__
+        if isinstance(member, (staticmethod, abstractstaticmethod)):
+            return member.__get__(object, object)
     return member
-
-
-def member_type_understood(member):
-    return not (
-        inspect.isdatadescriptor(member) and not isinstance(member, (property, abstractproperty))
-        or inspect.ismethoddescriptor(member) and not isinstance(member, (classmethod, staticmethod, abstractclassmethod, abstractstaticmethod))
-    )
 
 
 def is_method(member):

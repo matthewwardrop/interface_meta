@@ -1,6 +1,4 @@
-import inspect
-
-from .utils.inspection import set_quirk_docs_method, set_quirk_docs_mro
+from .utils.inspection import set_quirk_docs_method, set_quirk_docs_mro, _get_member
 
 
 def quirk_docs(method=None, mro=True):
@@ -63,13 +61,7 @@ def override(f=None, force=False):
             arguments are present.
     """
     def override(f):
-        annotated = f
-        if inspect.isdatadescriptor(annotated):
-            annotated = f.fget
-        elif inspect.ismethoddescriptor(annotated):
-            annotated = f.__get__(object, object)
-        if isinstance(f, classmethod):
-            annotated = f.__func__
+        annotated = _get_member(f)
         annotated.__override__ = True
         annotated.__override_force__ = force
         return f

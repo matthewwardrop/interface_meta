@@ -4,7 +4,7 @@ from abc import abstractproperty
 
 from .inspection import (
     has_explicit_override, is_method, is_functional_member,
-    get_functional_signature, has_forced_override, member_type_understood
+    get_functional_signature, has_forced_override
 )
 from .reporting import report_violation
 
@@ -39,10 +39,6 @@ def verify_conformance(name, clsname, member, ref_clsname, ref_member,
     if has_forced_override(member):
         return
 
-    if not member_type_understood(member):  # pragma: no cover
-        logging.debug("`interface_meta` does not know how to handle attribute `{}.{}` with type: `{}`. Skipping.".format(clsname, name, type(member)))
-        return
-
     # Check that type of member has not changed.
     if type(member) is not type(ref_member):
         if is_method(member) and is_method(ref_member):
@@ -64,7 +60,7 @@ def verify_conformance(name, clsname, member, ref_clsname, ref_member,
             pass
 
     # Check that overrides are present
-    if is_functional_member(member) or inspect.isdatadescriptor(member):
+    if is_functional_member(member) or inspect.isdatadescriptor(member) or inspect.ismethoddescriptor(member):
         if explicit_overrides and not has_explicit_override(member):
             report_violation(
                 "`{}.{}` overrides interface `{}.{}` without using the `@override` decorator.".format(

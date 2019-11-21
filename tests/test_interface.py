@@ -39,7 +39,6 @@ class Base(with_metaclass(InterfaceMeta, object)):
         """Split Method"""
         return self._split_method(a, b, c)
 
-    @override
     def _split_method(self, a, b, c):
         pass
 

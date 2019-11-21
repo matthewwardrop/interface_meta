@@ -5,8 +5,8 @@ from interface_meta.utils.inspection import (
     get_functional_signature, get_functional_wrapper, get_quirk_docs_method,
     get_quirk_docs_mro, has_class_attr_docs, has_explicit_override,
     has_forced_override, has_quirk_docs_method, has_quirk_docs_mro,
-    has_updatable_docs, is_functional_member, is_method, member_type_understood,
-    set_functional_docs, set_quirk_docs_method, set_quirk_docs_mro, signature
+    has_updatable_docs, is_functional_member, is_method, set_functional_docs,
+    set_quirk_docs_method, set_quirk_docs_mro, signature
 )
 
 
@@ -55,14 +55,6 @@ def test__get_member():
     assert is_method(_get_member(METHOD))
     assert is_method(_get_member(CLASS_METHOD))
     assert is_method(_get_member(STATIC_METHOD))
-
-
-def test_member_type_understood():
-    assert member_type_understood(ATTRIBUTE)
-    assert member_type_understood(PROPERTY)
-    assert member_type_understood(METHOD)
-    assert member_type_understood(CLASS_METHOD)
-    assert member_type_understood(STATIC_METHOD)
 
 
 def test_is_method():
