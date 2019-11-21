@@ -1,12 +1,15 @@
+import os
 from setuptools import find_packages, setup
+
+REPO_PATH = os.path.dirname(__file__)
 
 # Extract version information from Omniduct _version.py
 version_info = {}
-with open('interface_meta/_version.py') as version_file:
+with open(os.path.join(REPO_PATH, 'interface_meta', '_version.py')) as version_file:
     exec(version_file.read(), version_info)
 
 # Extract long description from readme
-with open('README.md') as readme:
+with open(os.path.join(REPO_PATH, 'README.md')) as readme:
     long_description = ""
     while True:
         line = readme.readline()
