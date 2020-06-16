@@ -32,7 +32,7 @@ class Base(metaclass=InterfaceMeta):
         """Class Method"""
         return "class_method"
 
-    @quirk_docs('_split_method')
+    @InterfaceMeta.inherit_docs('_split_method')
     def split_method(self, a, b, c):
         """Split Method"""
         return self._split_method(a, b, c)
@@ -53,18 +53,18 @@ class SubBase(Base):
         """Subclass Constructor"""
         pass
 
-    @override
+    @Base.override
     def regular_method(self, a, b, c):
         """Subclass Regular Method"""
         return "regular_method"
 
-    @override
+    @Base.override
     @staticmethod
     def static_method(a, b, c):
         """Subclass Static Method"""
         return "static_method"
 
-    @override(force=True)
+    @Base.override(force=True)
     @classmethod
     def class_method(cls, a, b, c):
         """Subclass Class Method"""
@@ -74,7 +74,7 @@ class SubBase(Base):
         """Subclass split_method quirks"""
         pass
 
-    @quirk_docs(mro=False)
+    @Base.inherit_docs(mro=False)
     def mro_documented(self, a, b, c):
         """Documentation in SubBase"""
 

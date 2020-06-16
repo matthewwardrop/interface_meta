@@ -1,7 +1,9 @@
-from .utils.inspection import set_quirk_docs_method, set_quirk_docs_mro, _get_member
+import warnings
+
+from .interface import InterfaceMeta
 
 
-def quirk_docs(method=None, mro=True):
+def inherit_docs(method=None, mro=True):
     """
     Indicate to `InterfaceMeta` how the wrapped method should be documented.
 
@@ -15,7 +17,7 @@ def quirk_docs(method=None, mro=True):
       skipped, in which case decorating with this method will enable
       documentation generation as if it were not.
 
-    Use this decorator as `@quirk_docs([method=...], [mro=...])`.
+    Use this decorator as `@inherit_docs([method=...], [mro=...])`.
 
     Args:
         method (str, None): A method from which documentation for implementation
@@ -31,14 +33,22 @@ def quirk_docs(method=None, mro=True):
         function: A function wrapper that attaches attributes `_quirks_method` and
         `_quirks_mro` to the method, for interpretation by `InterfaceMeta`.
     """
-    def doc_wrapper(f):
-        set_quirk_docs_method(f, method)
-        set_quirk_docs_mro(f, mro)
-        return f
-    return doc_wrapper
+    return InterfaceMeta.inherit_docs(method=method, mro=mro)
 
 
-def override(f=None, force=False):
+def quirk_docs(method=None, mro=True):
+    """
+    DEPRECATED: Please use `inherit_docs` instead.
+    """
+    warnings.warn(
+        "The `interface_meta.quirk_docs` decorator has been replaced by `implemented_by` and "
+        "will be removed in version 2.0.",
+        DeprecationWarning
+    )
+    return inherit_docs(method=method, mro=mro)
+
+
+def override(func=None, force=False):
     """
     Indicate to `InterfaceMeta` that this method has intentionally overridden an interface method.
 
@@ -50,7 +60,7 @@ def override(f=None, force=False):
     A recommended convention is to use this decorator as the outermost decorator.
 
     Args:
-        f (function, None): The function, if method is decorated by the decorator
+        func (function, None): The function, if method is decorated by the decorator
             without arguments (e.g. @override), else None.
         force (bool): Whether to force override of method even if the API does
             note match. Note that in this case, documentation is not inherited
@@ -60,12 +70,4 @@ def override(f=None, force=False):
         function: The wrapped function of function wrapper depending on which
             arguments are present.
     """
-    def override(f):
-        annotated = _get_member(f)
-        annotated.__override__ = True
-        annotated.__override_force__ = force
-        return f
-
-    if f is not None:
-        return override(f)
-    return override
+    return InterfaceMeta.override(func=func, force=force)
