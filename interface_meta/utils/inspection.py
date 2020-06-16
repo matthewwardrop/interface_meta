@@ -37,9 +37,8 @@ def is_functional_member(member):
     """
     Check whether a class member from the __dict__ attribute is a method.
 
-    In Python, this can be true in three ways:
-        - It is literally a Python function (in Python 3)
-        - It is a Python method (in Python 2)
+    This can be true in two ways:
+        - It is literally a Python function
         - It is a method descriptor (wrapping a function)
 
     Args:
@@ -50,7 +49,6 @@ def is_functional_member(member):
     """
     return (
         inspect.isfunction(member)
-        or inspect.ismethod(member)
         or (
             inspect.ismethoddescriptor(member)
             and isinstance(member, (classmethod, staticmethod))

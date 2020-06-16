@@ -1,8 +1,6 @@
+import inspect
 import textwrap
 from collections import OrderedDict
-
-import six
-import inspect
 
 from .inspection import (
     get_class_attr_docs, get_functional_docs, get_functional_wrapper,
@@ -118,7 +116,7 @@ def doc_join(*docs):
     for doc in docs:
         if doc in (None, ''):
             continue
-        elif isinstance(doc, six.string_types):
+        elif isinstance(doc, str):
             out.append(textwrap.dedent(doc).strip('\n'))
         elif isinstance(doc, (list, tuple)):
             if len(doc) < 2:

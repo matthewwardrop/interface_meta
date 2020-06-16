@@ -35,17 +35,18 @@ setup(
         'Environment :: Console',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
     ],
 
     # Package details
     packages=find_packages(),
 
     # Dependencies
+    python_requires='>=3.4',
     setup_requires=['setupmeta'],
     install_requires=version_info['__dependencies__']
 )

@@ -1,9 +1,7 @@
-from six import with_metaclass
-
-from interface_meta import InterfaceMeta, override, quirk_docs
+from interface_meta import InterfaceMeta
 
 
-class Base(with_metaclass(InterfaceMeta, object)):
+class Base(metaclass=InterfaceMeta):
     """Base class"""
     ATTRIBUTE = "class attribute"
 

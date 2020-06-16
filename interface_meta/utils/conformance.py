@@ -1,17 +1,13 @@
 import inspect
 import logging
 from abc import abstractproperty
+from inspect import Parameter
 
 from .inspection import (
     has_explicit_override, is_method, is_functional_member,
     get_functional_signature, has_forced_override
 )
 from .reporting import report_violation
-
-try:
-    from inspect import Parameter, _empty
-except ImportError:  # pragma: no cover
-    from funcsigs import Parameter, _empty
 
 
 def verify_conformance(name, clsname, member, ref_clsname, ref_member,
@@ -41,10 +37,7 @@ def verify_conformance(name, clsname, member, ref_clsname, ref_member,
 
     # Check that type of member has not changed.
     if type(member) is not type(ref_member):
-        if is_method(member) and is_method(ref_member):
-            # Python 2 distinguishes between instancemethods and functions
-            pass
-        elif type(member) in (abstractproperty, property) and not is_method(ref_member):
+        if type(member) in (abstractproperty, property) and not is_method(ref_member):
             # This should be okay, provided the property is properly crafted.
             pass
         elif is_functional_member(member):
@@ -118,7 +111,7 @@ def check_signatures_compatible(sig, ref_sig):
     base_params = iter(ref_sig.parameters.values())
 
     try:
-        for index, bp in enumerate(base_params):
+        for bp in base_params:
             cp = next(params)
 
             while bp.kind is Parameter.VAR_POSITIONAL and cp.kind is Parameter.POSITIONAL_OR_KEYWORD:
@@ -134,7 +127,7 @@ def check_signatures_compatible(sig, ref_sig):
         return False
 
     for param in params:
-        if param.kind is Parameter.POSITIONAL_ONLY or param.kind is Parameter.POSITIONAL_OR_KEYWORD and param.default == _empty:
+        if param.kind is Parameter.POSITIONAL_ONLY or param.kind is Parameter.POSITIONAL_OR_KEYWORD and param.default == inspect._empty:
             return False
 
     return True
