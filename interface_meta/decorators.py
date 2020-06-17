@@ -48,7 +48,7 @@ def quirk_docs(method=None, mro=True):
     return inherit_docs(method=method, mro=mro)
 
 
-def override(func=None, force=False):
+def override(func=None, force=False, f=None):
     """
     Indicate to `InterfaceMeta` that this method has intentionally overridden an interface method.
 
@@ -65,9 +65,17 @@ def override(func=None, force=False):
         force (bool): Whether to force override of method even if the API does
             note match. Note that in this case, documentation is not inherited
             from the MRO.
+        f (function, None): Deprecated predecessor of `func`. Maintained for
+            backward compatibility until v2.0.
 
     Returns:
         function: The wrapped function of function wrapper depending on which
             arguments are present.
     """
-    return InterfaceMeta.override(func=func, force=force)
+    if f is not None:
+        warnings.warn(
+            "The `f` argument to the `interface_meta.override` decorator has been renamed `func`. This "
+            "backward compatibility shim will be removed in 2.0.",
+            DeprecationWarning
+        )
+    return InterfaceMeta.override(func=func or f, force=force)
