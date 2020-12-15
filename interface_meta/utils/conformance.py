@@ -120,7 +120,7 @@ def check_signatures_compatible(sig, ref_sig):
             while bp.kind is Parameter.VAR_KEYWORD and cp.kind is not Parameter.VAR_KEYWORD:
                 cp = next(params)
 
-            if not (cp.name == bp.name and bp.kind == cp.kind and bp.default == cp.default and bp.annotation == cp.annotation):
+            if not (cp.name == bp.name and bp.kind == cp.kind and bp.default == cp.default):
                 raise ValueError(bp, cp)
 
     except (StopIteration, ValueError):
