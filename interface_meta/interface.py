@@ -50,6 +50,14 @@ class InterfaceMeta(ABCMeta):
                         raise_on_violation=raise_on_violation
                     )
                     break
+                if key in getattr(base, '__annotations__', {}):  # Declared but as yet unspecified attributes
+                    is_override = True
+                    cls.__verify_conformance(
+                        key, name, value, name, None,
+                        explicit_overrides=explicit_overrides,
+                        raise_on_violation=raise_on_violation
+                    )
+                    break
 
             if not is_override:
                 verify_not_overridden(key, name, value, raise_on_violation=raise_on_violation)
