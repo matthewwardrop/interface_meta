@@ -62,7 +62,7 @@ def verify_conformance(name, clsname, member, ref_clsname, ref_member,
                 raise_on_violation
             )
 
-    if is_functional_member(member):
+    if is_functional_member(member) and is_functional_member(ref_member):
         verify_signature(name, clsname, member, ref_clsname, ref_member, raise_on_violation=raise_on_violation)
 
 
