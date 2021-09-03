@@ -16,7 +16,7 @@ class InterfaceMeta(ABCMeta):
 
     INTERFACE_EXPLICIT_OVERRIDES = True
     INTERFACE_RAISE_ON_VIOLATION = False
-    INTERFACE_SKIPPED_NAMES = {'__init__'}
+    INTERFACE_SKIPPED_NAMES = set()
 
     def __init__(cls, name, bases, dct):
         ABCMeta.__init__(cls, name, bases, dct)
@@ -32,6 +32,10 @@ class InterfaceMeta(ABCMeta):
 
         # Iterate over names in `dct` and check for conformance to interface
         for key, value in dct.items():
+
+            # Skip any key corresponding to Python magic methods
+            if key.startswith('__') and key.endswith('__'):
+                continue
 
             # Skip any key in skipped_names
             if key in skipped_names:  # pragma: no cover

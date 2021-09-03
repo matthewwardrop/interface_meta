@@ -42,8 +42,21 @@ def update_docs(cls, name, bases, dct, skipped_names=None):
 
     cls.__doc__ = doc_join(*module_docs)
 
+    # Assemble class attribute names avoiding dunder methods
+    members = {}
+    for klass in reversed(cls.mro()):
+        members.update({
+            name: member
+            for name, member in klass.__dict__.items()
+            if not name.startswith('__') and not name.endswith('__')
+        })
+
     # Handle function/method-level documentation
-    for name, member in inspect.getmembers(cls):
+    for name, member in members.items():
+
+        # Skip magic methods
+        if name.startswith('__') and name.endswith('__'):
+            continue
 
         # Check if there is anything to do
         if not has_updatable_docs(member):
@@ -65,16 +78,16 @@ def update_docs(cls, name, bases, dct, skipped_names=None):
         method_docs = OrderedDict()
         last_docs = None
         for i, klass in enumerate(reversed(mro) if quirks_mro else mro[:1]):
-            if name in klass.__dict__:
-                klass_member = getattr(klass, name)
+            klass_member = klass.__dict__.get(name, None)
+            if klass_member is not None:
                 member_docs = get_functional_docs(klass_member)
                 if (i == 0 or member_docs) and member_docs != last_docs:
                     last_docs = method_docs[klass.__name__] = member_docs
                 if not get_quirk_docs_mro(klass_member):
                     break
 
-        if quirks_method is not None and hasattr(cls, quirks_method):
-            quirk_member = getattr(cls, quirks_method)
+        if quirks_method is not None and quirks_method in members:
+            quirk_member = members.get(quirks_method)
             quirk_member_docs = get_functional_docs(quirk_member)
             if quirk_member_docs:
                 if cls.__name__ in method_docs:
