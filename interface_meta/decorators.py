@@ -43,7 +43,7 @@ def quirk_docs(method=None, mro=True):
     warnings.warn(
         "The `interface_meta.quirk_docs` decorator has been replaced by `implemented_by` and "
         "will be removed in version 2.0.",
-        DeprecationWarning
+        DeprecationWarning,
     )
     return inherit_docs(method=method, mro=mro)
 
@@ -76,6 +76,6 @@ def override(func=None, force=False, f=None):
         warnings.warn(
             "The `f` argument to the `interface_meta.override` decorator has been renamed `func`. This "
             "backward compatibility shim will be removed in 2.0.",
-            DeprecationWarning
+            DeprecationWarning,
         )
     return InterfaceMeta.override(func=func or f, force=force)

@@ -16,10 +16,13 @@ except ImportError:  # pragma: no cover
 
 # Abstract away differences between functions, methods and descriptors
 
+
 def _get_member(member):
     if inspect.ismethod(member):
         return member.__func__
-    if inspect.isdatadescriptor(member) and isinstance(member, (property, abstractproperty)):
+    if inspect.isdatadescriptor(member) and isinstance(
+        member, (property, abstractproperty)
+    ):
         return member.fget
     if inspect.ismethoddescriptor(member):
         if isinstance(member, (classmethod, abstractclassmethod)):
@@ -47,12 +50,9 @@ def is_functional_member(member):
     Returns:
         bool: `True` if the member is a function (or acts like one).
     """
-    return (
-        inspect.isfunction(member)
-        or (
-            inspect.ismethoddescriptor(member)
-            and isinstance(member, (classmethod, staticmethod))
-        )
+    return inspect.isfunction(member) or (
+        inspect.ismethoddescriptor(member)
+        and isinstance(member, (classmethod, staticmethod))
     )
 
 
@@ -102,7 +102,7 @@ def get_functional_wrapper(member):
     def wrapper(*args, **kwargs):  # pragma: no cover
         return function(*args, **kwargs)
 
-    for attr in ['_quirks_method', '_quirks_mro', '__override__', '__override_force__']:
+    for attr in ["_quirks_method", "_quirks_mro", "__override__", "__override_force__"]:
         if hasattr(function, attr):
             setattr(wrapper, attr, getattr(function, attr))
 
@@ -117,63 +117,70 @@ def get_functional_wrapper(member):
 
 # Override checking
 
+
 def has_explicit_override(member):
-    return functional_getattr(member, '__override__', False)
+    return functional_getattr(member, "__override__", False)
 
 
 def has_forced_override(member):
-    return functional_getattr(member, '__override_force__', False)
+    return functional_getattr(member, "__override_force__", False)
 
 
 # Documentation helpers
 
+
 def has_updatable_docs(member):
     return (
-        is_functional_member(member) or inspect.isdatadescriptor(member) and isinstance(member, (property, abstractproperty))
+        is_functional_member(member)
+        or inspect.isdatadescriptor(member)
+        and isinstance(member, (property, abstractproperty))
     )
 
 
 def get_functional_docs(member, orig=True):
-    if orig and functional_hasattr(member, '__doc_orig__'):
-        return functional_getattr(member, '__doc_orig__')
-    return functional_getattr(member, '__doc__')
+    if orig and functional_hasattr(member, "__doc_orig__"):
+        return functional_getattr(member, "__doc_orig__")
+    return functional_getattr(member, "__doc__")
 
 
 def set_functional_docs(member, docs):
-    if not functional_hasattr(member, '__doc_orig__'):
-        functional_setattr(member, '__doc_orig__', functional_getattr(member, '__doc__'))
-    functional_setattr(member, '__doc__', docs)
+    if not functional_hasattr(member, "__doc_orig__"):
+        functional_setattr(
+            member, "__doc_orig__", functional_getattr(member, "__doc__")
+        )
+    functional_setattr(member, "__doc__", docs)
 
 
 def has_class_attr_docs(cls):
-    return hasattr(cls, '_{}__doc_attrs'.format(cls.__name__))
+    return hasattr(cls, "_{}__doc_attrs".format(cls.__name__))
 
 
 def get_class_attr_docs(cls):
-    return getattr(cls, '_{}__doc_attrs'.format(cls.__name__))
+    return getattr(cls, "_{}__doc_attrs".format(cls.__name__))
 
 
 # Quirk documentation helpers
 
+
 def has_quirk_docs_method(member):
-    return functional_hasattr(member, '_quirks_method')
+    return functional_hasattr(member, "_quirks_method")
 
 
 def get_quirk_docs_method(member):
-    return functional_getattr(member, '_quirks_method', None)
+    return functional_getattr(member, "_quirks_method", None)
 
 
 def set_quirk_docs_method(member, method):
-    return functional_setattr(member, '_quirks_method', method)
+    return functional_setattr(member, "_quirks_method", method)
 
 
 def has_quirk_docs_mro(member):
-    return functional_hasattr(member, '_quirks_mro')
+    return functional_hasattr(member, "_quirks_mro")
 
 
 def get_quirk_docs_mro(member):
-    return functional_getattr(member, '_quirks_mro', True)
+    return functional_getattr(member, "_quirks_mro", True)
 
 
 def set_quirk_docs_mro(member, mro):
-    return functional_setattr(member, '_quirks_mro', mro)
+    return functional_setattr(member, "_quirks_mro", mro)

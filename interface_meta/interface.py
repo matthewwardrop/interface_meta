@@ -22,19 +22,23 @@ class InterfaceMeta(ABCMeta):
         ABCMeta.__init__(cls, name, bases, dct)
 
         # Register interface class for subclasses
-        if not hasattr(cls, '__interface__'):
+        if not hasattr(cls, "__interface__"):
             cls.__interface__ = cls
 
         # Read configuration
-        explicit_overrides = cls.__get_config(bases, dct, 'INTERFACE_EXPLICIT_OVERRIDES')
-        raise_on_violation = cls.__get_config(bases, dct, 'INTERFACE_RAISE_ON_VIOLATION')
-        skipped_names = cls.__get_config(bases, dct, 'INTERFACE_SKIPPED_NAMES')
+        explicit_overrides = cls.__get_config(
+            bases, dct, "INTERFACE_EXPLICIT_OVERRIDES"
+        )
+        raise_on_violation = cls.__get_config(
+            bases, dct, "INTERFACE_RAISE_ON_VIOLATION"
+        )
+        skipped_names = cls.__get_config(bases, dct, "INTERFACE_SKIPPED_NAMES")
 
         # Iterate over names in `dct` and check for conformance to interface
         for key, value in dct.items():
 
             # Skip any key corresponding to Python magic methods
-            if key.startswith('__') and key.endswith('__'):
+            if key.startswith("__") and key.endswith("__"):
                 continue
 
             # Skip any key in skipped_names
@@ -49,22 +53,34 @@ class InterfaceMeta(ABCMeta):
                 if key in base.__dict__:
                     is_override = True
                     cls.__verify_conformance(
-                        key, name, value, base.__name__, base.__dict__[key],
+                        key,
+                        name,
+                        value,
+                        base.__name__,
+                        base.__dict__[key],
                         explicit_overrides=explicit_overrides,
-                        raise_on_violation=raise_on_violation
+                        raise_on_violation=raise_on_violation,
                     )
                     break
-                if key in getattr(base, '__annotations__', {}):  # Declared but as yet unspecified attributes
+                if key in getattr(
+                    base, "__annotations__", {}
+                ):  # Declared but as yet unspecified attributes
                     is_override = True
                     cls.__verify_conformance(
-                        key, name, value, name, None,
+                        key,
+                        name,
+                        value,
+                        name,
+                        None,
                         explicit_overrides=explicit_overrides,
-                        raise_on_violation=raise_on_violation
+                        raise_on_violation=raise_on_violation,
                     )
                     break
 
             if not is_override:
-                verify_not_overridden(key, name, value, raise_on_violation=raise_on_violation)
+                verify_not_overridden(
+                    key, name, value, raise_on_violation=raise_on_violation
+                )
 
         # Update documentation
         cls.__update_docs(cls, name, bases, dct)
@@ -83,17 +99,29 @@ class InterfaceMeta(ABCMeta):
         return dct.get(key, default)
 
     @classmethod
-    def __verify_conformance(mcls, key, name, value, base_name, base_value,
-                             explicit_overrides=True, raise_on_violation=False):
+    def __verify_conformance(
+        mcls,
+        key,
+        name,
+        value,
+        base_name,
+        base_value,
+        explicit_overrides=True,
+        raise_on_violation=False,
+    ):
         return verify_conformance(
-            key, name, value, base_name, base_value,
+            key,
+            name,
+            value,
+            base_name,
+            base_value,
             explicit_overrides=explicit_overrides,
-            raise_on_violation=raise_on_violation
+            raise_on_violation=raise_on_violation,
         )
 
     @classmethod
     def __update_docs(mcls, cls, name, bases, dct):
-        skipped_names = mcls.__get_config(bases, dct, 'INTERFACE_SKIPPED_NAMES')
+        skipped_names = mcls.__get_config(bases, dct, "INTERFACE_SKIPPED_NAMES")
         return update_docs(cls, name, bases, dct, skipped_names=skipped_names)
 
     @classmethod
@@ -128,10 +156,12 @@ class InterfaceMeta(ABCMeta):
             function: A function wrapper that attaches attributes `_quirks_method` and
             `_quirks_mro` to the method, for interpretation by `InterfaceMeta`.
         """
+
         def doc_wrapper(f):
             set_quirk_docs_method(f, method)
             set_quirk_docs_mro(f, mro)
             return f
+
         return doc_wrapper
 
     @classmethod
@@ -158,6 +188,7 @@ class InterfaceMeta(ABCMeta):
             function: The wrapped function of function wrapper depending on which
                 arguments are present.
         """
+
         def override(f):
             annotated = _get_member(f)
             annotated.__override__ = True

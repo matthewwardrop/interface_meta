@@ -3,10 +3,16 @@ import textwrap
 from collections import OrderedDict
 
 from .inspection import (
-    get_class_attr_docs, get_functional_docs, get_functional_wrapper,
-    get_quirk_docs_method, get_quirk_docs_mro, has_class_attr_docs,
-    has_forced_override, has_quirk_docs_mro, has_updatable_docs,
-    set_functional_docs
+    get_class_attr_docs,
+    get_functional_docs,
+    get_functional_wrapper,
+    get_quirk_docs_method,
+    get_quirk_docs_mro,
+    has_class_attr_docs,
+    has_forced_override,
+    has_quirk_docs_mro,
+    has_updatable_docs,
+    set_functional_docs,
 )
 
 
@@ -28,34 +34,40 @@ def update_docs(cls, name, bases, dct, skipped_names=None):
     """
 
     mro = inspect.getmro(cls)
-    mro = mro[:mro.index(cls.__interface__) + 1]
+    mro = mro[: mro.index(cls.__interface__) + 1]
     skipped_names = skipped_names or set()
 
     # Handle module-level documentation
     module_docs = [cls.__doc__]
     for klass in mro:
         if has_class_attr_docs(klass):
-            module_docs.append([
-                'Attributes:' if klass is cls else 'Attributes inherited from {}:'.format(klass.__name__),
-                inspect.cleandoc(get_class_attr_docs(klass))
-            ])
+            module_docs.append(
+                [
+                    "Attributes:"
+                    if klass is cls
+                    else "Attributes inherited from {}:".format(klass.__name__),
+                    inspect.cleandoc(get_class_attr_docs(klass)),
+                ]
+            )
 
     cls.__doc__ = doc_join(*module_docs)
 
     # Assemble class attribute names avoiding dunder methods
     members = {}
     for klass in reversed(cls.mro()):
-        members.update({
-            name: member
-            for name, member in klass.__dict__.items()
-            if not name.startswith('__') and not name.endswith('__')
-        })
+        members.update(
+            {
+                name: member
+                for name, member in klass.__dict__.items()
+                if not name.startswith("__") and not name.endswith("__")
+            }
+        )
 
     # Handle function/method-level documentation
     for name, member in members.items():
 
         # Skip magic methods
-        if name.startswith('__') and name.endswith('__'):
+        if name.startswith("__") and name.endswith("__"):
             continue
 
         # Check if there is anything to do
@@ -69,8 +81,10 @@ def update_docs(cls, name, bases, dct, skipped_names=None):
         if (
             inspect.isabstract(member)
             or has_forced_override(member)
-            or name in skipped_names and not (has_quirks_mro or quirks_method)
-            or name not in cls.__dict__ and quirks_method is None
+            or name in skipped_names
+            and not (has_quirks_mro or quirks_method)
+            or name not in cls.__dict__
+            and quirks_method is None
         ):
             continue
 
@@ -91,7 +105,11 @@ def update_docs(cls, name, bases, dct, skipped_names=None):
             quirk_member_docs = get_functional_docs(quirk_member)
             if quirk_member_docs:
                 if cls.__name__ in method_docs:
-                    method_docs[cls.__name__] = inspect.cleandoc(method_docs[cls.__name__]) + '\n\n' + inspect.cleandoc(quirk_member_docs)
+                    method_docs[cls.__name__] = (
+                        inspect.cleandoc(method_docs[cls.__name__])
+                        + "\n\n"
+                        + inspect.cleandoc(quirk_member_docs)
+                    )
                 else:
                     method_docs[cls.__name__] = quirk_member_docs
 
@@ -102,10 +120,15 @@ def update_docs(cls, name, bases, dct, skipped_names=None):
                 # underlying method that may be shared by multiple classes.
                 member = get_functional_wrapper(member)
 
-            set_functional_docs(member, doc_join(*[
-                docs if i == 0 else [source + ' Quirks:', docs]
-                for i, (source, docs) in enumerate(method_docs.items())
-            ]))
+            set_functional_docs(
+                member,
+                doc_join(
+                    *[
+                        docs if i == 0 else [source + " Quirks:", docs]
+                        for i, (source, docs) in enumerate(method_docs.items())
+                    ]
+                ),
+            )
 
             if name not in cls.__dict__:
                 setattr(cls, name, member)
@@ -127,23 +150,26 @@ def doc_join(*docs):
     """
     out = []
     for doc in docs:
-        if doc in (None, ''):
+        if doc in (None, ""):
             continue
         elif isinstance(doc, str):
-            out.append(textwrap.dedent(doc).strip('\n'))
+            out.append(textwrap.dedent(doc).strip("\n"))
         elif isinstance(doc, (list, tuple)):
             if len(doc) < 2:
                 continue
             d = doc_join(*doc[1:])
             if d:
                 if not out:
-                    out.append('\n')
+                    out.append("\n")
                 out.append(
-                    '{header}\n{body}'.format(
+                    "{header}\n{body}".format(
                         header=doc[0].strip(),
-                        body='    ' + d.replace('\n', '\n    ')  # textwrap.indent not available in python2
+                        body="    "
+                        + d.replace(
+                            "\n", "\n    "
+                        ),  # textwrap.indent not available in python2
                     )
                 )
         else:
             raise ValueError("Unrecognised doc format: {}".format(type(doc)))
-    return '\n\n'.join(out) or None
+    return "\n\n".join(out) or None
