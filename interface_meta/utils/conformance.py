@@ -4,14 +4,24 @@ from abc import abstractproperty
 from inspect import Parameter
 
 from .inspection import (
-    has_explicit_override, is_method, is_functional_member,
-    get_functional_signature, has_forced_override
+    has_explicit_override,
+    is_method,
+    is_functional_member,
+    get_functional_signature,
+    has_forced_override,
 )
 from .reporting import report_violation
 
 
-def verify_conformance(name, clsname, member, ref_clsname, ref_member,
-                       explicit_overrides=True, raise_on_violation=False):
+def verify_conformance(
+    name,
+    clsname,
+    member,
+    ref_clsname,
+    ref_member,
+    explicit_overrides=True,
+    raise_on_violation=False,
+):
     """
     Verify that a member conforms to a nominated interface.
 
@@ -29,7 +39,9 @@ def verify_conformance(name, clsname, member, ref_clsname, ref_member,
         raise_on_violation (bool): Whether any non-conformance should cause an
             exception to be raised. (default: False)
     """
-    if hasattr(ref_member, '__objclass__'):  # pragma: no cover; Method is attached to metaclass, so should not be checked.
+    if hasattr(
+        ref_member, "__objclass__"
+    ):  # pragma: no cover; Method is attached to metaclass, so should not be checked.
         return
 
     if has_forced_override(member):
@@ -47,26 +59,39 @@ def verify_conformance(name, clsname, member, ref_clsname, ref_member,
                 "`{}.{}` changes the type of `{}.{}` (`{}` instead of `{}`) without using `@override(force=True)` decorator.".format(
                     clsname, name, ref_clsname, name, type(member), type(ref_member)
                 ),
-                raise_on_violation
+                raise_on_violation,
             )
         else:  # Most other type changes should be fine
             pass
 
     # Check that overrides are present
-    if is_functional_member(member) or inspect.isdatadescriptor(member) or inspect.ismethoddescriptor(member):
+    if (
+        is_functional_member(member)
+        or inspect.isdatadescriptor(member)
+        or inspect.ismethoddescriptor(member)
+    ):
         if explicit_overrides and not has_explicit_override(member):
             report_violation(
                 "`{}.{}` overrides interface `{}.{}` without using the `@override` decorator.".format(
                     clsname, name, ref_clsname, name
                 ),
-                raise_on_violation
+                raise_on_violation,
             )
 
     if is_functional_member(member) and is_functional_member(ref_member):
-        verify_signature(name, clsname, member, ref_clsname, ref_member, raise_on_violation=raise_on_violation)
+        verify_signature(
+            name,
+            clsname,
+            member,
+            ref_clsname,
+            ref_member,
+            raise_on_violation=raise_on_violation,
+        )
 
 
-def verify_signature(name, clsname, member, ref_clsname, ref_member, raise_on_violation=False):
+def verify_signature(
+    name, clsname, member, ref_clsname, ref_member, raise_on_violation=False
+):
     """
     Verify that the signature of a member is compatible with some reference member.
 
@@ -114,20 +139,32 @@ def check_signatures_compatible(sig, ref_sig):
         for bp in base_params:
             cp = next(params)
 
-            while bp.kind is Parameter.VAR_POSITIONAL and cp.kind is Parameter.POSITIONAL_OR_KEYWORD:
+            while (
+                bp.kind is Parameter.VAR_POSITIONAL
+                and cp.kind is Parameter.POSITIONAL_OR_KEYWORD
+            ):
                 cp = next(params)
 
-            while bp.kind is Parameter.VAR_KEYWORD and cp.kind is not Parameter.VAR_KEYWORD:
+            while (
+                bp.kind is Parameter.VAR_KEYWORD
+                and cp.kind is not Parameter.VAR_KEYWORD
+            ):
                 cp = next(params)
 
-            if not (cp.name == bp.name and bp.kind == cp.kind and bp.default == cp.default):
+            if not (
+                cp.name == bp.name and bp.kind == cp.kind and bp.default == cp.default
+            ):
                 raise ValueError(bp, cp)
 
     except (StopIteration, ValueError):
         return False
 
     for param in params:
-        if param.kind is Parameter.POSITIONAL_ONLY or param.kind is Parameter.POSITIONAL_OR_KEYWORD and param.default == inspect._empty:
+        if (
+            param.kind is Parameter.POSITIONAL_ONLY
+            or param.kind is Parameter.POSITIONAL_OR_KEYWORD
+            and param.default == inspect._empty
+        ):
             return False
 
     return True
@@ -147,6 +184,8 @@ def verify_not_overridden(name, clsname, member, raise_on_violation=False):
     """
     if has_explicit_override(member):
         report_violation(
-            "`{clsname}.{name}` claims to override interface method, but no such method exists.".format(clsname=clsname, name=name),
-            raise_on_violation=raise_on_violation
+            "`{clsname}.{name}` claims to override interface method, but no such method exists.".format(
+                clsname=clsname, name=name
+            ),
+            raise_on_violation=raise_on_violation,
         )

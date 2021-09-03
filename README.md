@@ -3,7 +3,9 @@
 [![PyPI - Version](https://img.shields.io/pypi/v/interface_meta.svg)](https://pypi.org/project/interface_meta/)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/interface_meta.svg)
 ![PyPI - Status](https://img.shields.io/pypi/status/interface_meta.svg)
-
+[![build](https://img.shields.io/github/workflow/status/matthewwardrop/interface_meta/Run%20Tox%20Tests)](https://github.com/matthewwardrop/interface_meta/actions?query=workflow%3A%22Run+Tox+Tests%22)
+[![codecov](https://codecov.io/gh/matthewwardrop/interface_meta/branch/main/graph/badge.svg)](https://codecov.io/gh/matthewwardrop/interface_meta)
+[![Code Style](https://img.shields.io/badge/code%20style-black-black)](https://github.com/psf/black)
 
 `interface_meta` provides a convenient way to expose an extensible API with
 enforced method signatures and consistent documentation.

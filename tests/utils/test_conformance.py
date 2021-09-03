@@ -31,7 +31,9 @@ def f(a, b=None, c=None):
 
 
 if not six.PY2:
-    exec(textwrap.dedent("""
+    exec(
+        textwrap.dedent(
+            """
         def g(a, *args, b=None):
                 pass
 
@@ -50,7 +52,10 @@ if not six.PY2:
 
         def k(a, *args, b=None):
             pass
-    """), globals())
+    """
+        ),
+        globals(),
+    )
 
 
 def test_signature_checking():
@@ -76,15 +81,17 @@ def test_signature_checking():
         (f, e): True,
     }
     if not six.PY2:
-        solutions.update({
-            (f, g): False,  # noqa: F821
-            (h, g): True,  # noqa: F821
-            (i, h): False,  # noqa: F821
-            (j, i): True,  # noqa: F821
-            (i, j): False,  # noqa: F821
-            (k, j): False,  # noqa: F821
-            (j, k): True  # noqa: F821
-        })
+        solutions.update(
+            {
+                (f, g): False,  # noqa: F821
+                (h, g): True,  # noqa: F821
+                (i, h): False,  # noqa: F821
+                (j, i): True,  # noqa: F821
+                (i, j): False,  # noqa: F821
+                (k, j): False,  # noqa: F821
+                (j, k): True,  # noqa: F821
+            }
+        )
 
     for (impl, ref), solution in solutions.items():
         assert check_signatures_compatible(signature(impl), signature(ref)) is solution
