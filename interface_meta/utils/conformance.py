@@ -4,11 +4,12 @@ from abc import abstractproperty
 from inspect import Parameter
 
 from .inspection import (
-    has_explicit_override,
-    is_method,
-    is_functional_member,
     get_functional_signature,
+    has_explicit_override,
     has_forced_override,
+    is_functional_member,
+    is_method,
+    should_skip,
 )
 from .reporting import report_violation
 
@@ -44,7 +45,7 @@ def verify_conformance(
     ):  # pragma: no cover; Method is attached to metaclass, so should not be checked.
         return
 
-    if has_forced_override(member):
+    if has_forced_override(member) or should_skip(ref_member):
         return
 
     # Check that type of member has not changed.

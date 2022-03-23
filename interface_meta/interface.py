@@ -2,7 +2,13 @@ from abc import ABCMeta
 
 from .utils.conformance import verify_conformance, verify_not_overridden
 from .utils.docs import update_docs
-from .utils.inspection import set_quirk_docs_method, set_quirk_docs_mro, _get_member
+from .utils.inspection import (
+    set_explicit_override,
+    set_forced_override,
+    set_quirk_docs_method,
+    set_quirk_docs_mro,
+    should_skip,
+)
 
 
 class InterfaceMeta(ABCMeta):
@@ -42,7 +48,7 @@ class InterfaceMeta(ABCMeta):
                 continue
 
             # Skip any key in skipped_names
-            if key in skipped_names:  # pragma: no cover
+            if key in skipped_names or should_skip(value):  # pragma: no cover
                 continue
 
             # Identify the first instance of this key in the MRO, if it exists, and check conformance
@@ -190,9 +196,8 @@ class InterfaceMeta(ABCMeta):
         """
 
         def override(f):
-            annotated = _get_member(f)
-            annotated.__override__ = True
-            annotated.__override_force__ = force
+            set_explicit_override(f)
+            set_forced_override(f, force)
             return f
 
         if func is not None:

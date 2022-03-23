@@ -1,6 +1,7 @@
 import warnings
 
 from .interface import InterfaceMeta
+from .utils.inspection import set_skip
 
 
 def inherit_docs(method=None, mro=True):
@@ -79,3 +80,17 @@ def override(func=None, force=False, f=None):
             DeprecationWarning,
         )
     return InterfaceMeta.override(func=func or f, force=force)
+
+
+def skip(func):
+    """
+    Indicate to `InterfaceMeta` that this method should be skipped.
+
+    Args:
+        func (function): The function/member to mark as skipped.
+
+    Returns:
+        function: The marked function/member (same instance as that passed in).
+    """
+    set_skip(func, skip=True)
+    return func

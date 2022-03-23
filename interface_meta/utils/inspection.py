@@ -122,8 +122,27 @@ def has_explicit_override(member):
     return functional_getattr(member, "__override__", False)
 
 
+def set_explicit_override(member, override=True):
+    return functional_setattr(member, "__override__", override)
+
+
 def has_forced_override(member):
     return functional_getattr(member, "__override_force__", False)
+
+
+def set_forced_override(member, force=True):
+    return functional_setattr(member, "__override_force__", force)
+
+
+# Skip interface conformance checks
+
+
+def should_skip(member):
+    return functional_getattr(member, "__interface_meta_skip__", False)
+
+
+def set_skip(member, skip=True):
+    return functional_setattr(member, "__interface_meta_skip__", skip)
 
 
 # Documentation helpers
