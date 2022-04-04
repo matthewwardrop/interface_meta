@@ -46,10 +46,9 @@ such, this library boasts the following features:
 
 ```python
 from abc import abstractmethod, abstractproperty
-from six import with_metaclass
 from interface_meta import InterfaceMeta, override, quirk_docs
 
-class MyInterface(with_metaclass(InterfaceMeta, object)):
+class MyInterface(metaclass=InterfaceMeta):
     """
     An example interface.
     """
