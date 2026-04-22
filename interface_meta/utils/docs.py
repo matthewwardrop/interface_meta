@@ -32,11 +32,10 @@ def update_docs(
     magic required to see that this is the case.
 
     Args:
-        name (str): The name of the class being constructed.
-        bases (list<class,type>): The bases of the class being constructed.
-        dct (dict): The class dictionary being used to construct the class.
-        skipped_names (list<str>): Names for which to skip the documentation
-            rewriting.
+        name: The name of the class being constructed.
+        bases: The bases of the class being constructed.
+        dct: The class dictionary being used to construct the class.
+        skipped_names: Names for which to skip the documentation rewriting.
     """
 
     mro = inspect.getmro(cls)
@@ -143,14 +142,13 @@ def doc_join(*docs: Any) -> str | None:
     Stitch multiple pieces of documentation into one docstring.
 
     Args:
-        *docs (tuple<str, list<str>, tuple<str>>): A sequence of strings or
-            length-2 sequences of strings to stitch together into a docstring.
-            If a length-2 sequence is provided, then the first string is treated
-            as a section header, and the rest of the string is indented
-            beneath it.
+        *docs: A sequence of strings or length-2 sequences of strings to stitch
+            together into a docstring. If a length-2 sequence is provided, then
+            the first string is treated as a section header, and the rest of the
+            string is indented beneath it.
 
     Returns:
-        str: The stitched together docstring.
+        The stitched together docstring.
     """
     out: list[str] = []
     for doc in docs:

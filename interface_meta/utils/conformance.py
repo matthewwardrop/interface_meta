@@ -26,17 +26,13 @@ def verify_conformance(
     Verify that a member conforms to a nominated interface.
 
     Args:
-        name (str): The name of the member method being checked.
-        clsname (str): The name of the class parent of the checked member.
-        member (object): The class member to check for conformance against
-            ref_member.
-        ref_clsname (str): The name of the reference class to be treated as an
-            interface.
-        ref_member (object): The referece member to be treated as an interface
-            definition.
-        explicit_overrides (bool): Whether to require explicit overrides.
-            (default: True)
-        raise_on_violation (bool): Whether any non-conformance should cause an
+        name: The name of the member method being checked.
+        clsname: The name of the class parent of the checked member.
+        member: The class member to check for conformance against ref_member.
+        ref_clsname: The name of the reference class to be treated as an interface.
+        ref_member: The referece member to be treated as an interface definition.
+        explicit_overrides: Whether to require explicit overrides. (default: True)
+        raise_on_violation: Whether any non-conformance should cause an
             exception to be raised. (default: False)
     """
     if hasattr(
@@ -97,15 +93,12 @@ def verify_signature(
     Verify that the signature of a member is compatible with some reference member.
 
     Args:
-        name (str): The name of the member method being checked.
-        clsname (str): The name of the class parent of the checked member.
-        member (object): The class member to check for conformance against
-            ref_member.
-        ref_clsname (str): The name of the reference class to be treated as an
-            interface.
-        ref_member (object): The referece member to be treated as an interface
-            definition.
-        raise_on_violation (bool): Whether any non-conformance should cause an
+        name: The name of the member method being checked.
+        clsname: The name of the class parent of the checked member.
+        member: The class member to check for conformance against ref_member.
+        ref_clsname: The name of the reference class to be treated as an interface.
+        ref_member: The referece member to be treated as an interface definition.
+        raise_on_violation: Whether any non-conformance should cause an
             exception to be raised. (default: False)
     """
     sig = get_functional_signature(member)
@@ -124,12 +117,11 @@ def check_signatures_compatible(sig: Signature, ref_sig: Signature) -> bool:
     Check whether two signatures are compatible.
 
     Args:
-        sig (Signature): A signature of a member to check for compatibility with
-            `ref_sig`.
-        ref_sig (Signature): The reference signature.
+        sig: A signature of a member to check for compatibility with `ref_sig`.
+        ref_sig: The reference signature.
 
     Returns:
-        bool: `True` if the signatures are compatible, and `False` otherwise.
+        `True` if the signatures are compatible, and `False` otherwise.
     """
     params = iter(sig.parameters.values())
     base_params = iter(ref_sig.parameters.values())
@@ -181,11 +173,10 @@ def verify_not_overridden(
     Verify that a nominated member is *not* an override.
 
     Args:
-        name (str): The name of the member method being checked.
-        clsname (str): The name of the class parent of the checked member.
-        member (object): The class member to check for conformance against
-            ref_member.
-        raise_on_violation (bool): Whether any non-conformance should cause an
+        name: The name of the member method being checked.
+        clsname: The name of the class parent of the checked member.
+        member: The class member to check for conformance against ref_member.
+        raise_on_violation: Whether any non-conformance should cause an
             exception to be raised. (default: False)
     """
     if has_explicit_override(member):

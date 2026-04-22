@@ -29,17 +29,17 @@ def inherit_docs(
     Use this decorator as `@inherit_docs([method=...], [mro=...])`.
 
     Args:
-        method (str, None): A method from which documentation for implementation
+        method: A method from which documentation for implementation
             specific quirks should be extracted. [Useful when implementations
             of an interface are supposed to change underlying methods rather
             than the public method itself].
-        mro (bool): Whether to include documentation from all levels of the
+        mro: Whether to include documentation from all levels of the
             MRO, starting from the most primitive class that implementated it.
             All higher levels will be considered as "quirks" to the interface's
             definition.
 
     Returns:
-        function: A function wrapper that attaches attributes `_quirks_method` and
+        A function wrapper that attaches attributes `_quirks_method` and
         `_quirks_mro` to the method, for interpretation by `InterfaceMeta`.
     """
     return InterfaceMeta.inherit_docs(method=method, mro=mro)
@@ -64,14 +64,14 @@ def override(
     A recommended convention is to use this decorator as the outermost decorator.
 
     Args:
-        func (function, None): The function, if method is decorated by the decorator
+        func: The function, if method is decorated by the decorator
             without arguments (e.g. @override), else None.
-        force (bool): Whether to force override of method even if the API does
+        force: Whether to force override of method even if the API does
             note match. Note that in this case, documentation is not inherited
             from the MRO.
 
     Returns:
-        function: The wrapped function of function wrapper depending on which
+        The wrapped function or function wrapper depending on which
             arguments are present.
     """
     if func is not None:
@@ -84,10 +84,10 @@ def skip(func: _FuncT) -> _FuncT:
     Indicate to `InterfaceMeta` that this method should be skipped.
 
     Args:
-        func (function): The function/member to mark as skipped.
+        func: The function/member to mark as skipped.
 
     Returns:
-        function: The marked function/member (same instance as that passed in).
+        The marked function/member (same instance as that passed in).
     """
     set_skip(func, skip=True)
     return func

@@ -171,17 +171,17 @@ class InterfaceMeta(ABCMeta):
         or `@<metaclass instance>.inherit_docs([method=...], [mro=...])`.
 
         Args:
-            method (str, None): A method from which documentation for implementation
+            method: A method from which documentation for implementation
                 specific quirks should be extracted. [Useful when implementations
                 of an interface are supposed to change underlying methods rather
                 than the public method itself].
-            mro (bool): Whether to include documentation from all levels of the
+            mro: Whether to include documentation from all levels of the
                 MRO, starting from the most primitive class that implementated it.
                 All higher levels will be considered as "quirks" to the interface's
                 definition.
 
         Returns:
-            function: A function wrapper that attaches attributes `_quirks_method` and
+            A function wrapper that attaches attributes `_quirks_method` and
             `_quirks_mro` to the method, for interpretation by `InterfaceMeta`.
         """
 
@@ -216,14 +216,14 @@ class InterfaceMeta(ABCMeta):
         A recommended convention is to use this decorator as the outermost decorator.
 
         Args:
-            f (function, None): The function, if method is decorated by the decorator
+            func: The function, if method is decorated by the decorator
                 without arguments (e.g. @override), else None.
-            force (bool): Whether to force override of method even if the API does
+            force: Whether to force override of method even if the API does
                 note match. Note that in this case, documentation is not inherited
                 from the MRO.
 
         Returns:
-            function: The wrapped function of function wrapper depending on which
+            The wrapped function or function wrapper depending on which
                 arguments are present.
         """
 

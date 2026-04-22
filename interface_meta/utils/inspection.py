@@ -36,10 +36,10 @@ def is_functional_member(member: object) -> bool:
         - It is a method descriptor (wrapping a function)
 
     Args:
-        member (object): An object in the class __dict__.
+        member: An object in the class __dict__.
 
     Returns:
-        bool: `True` if the member is a function (or acts like one).
+        `True` if the member is a function (or acts like one).
     """
     return inspect.isfunction(member) or (
         inspect.ismethoddescriptor(member)
@@ -85,10 +85,10 @@ def get_functional_wrapper(member: object) -> object:
     function does just that.
 
     Args:
-        member (functional): The functional object to be wrapped.
+        member: The functional object to be wrapped.
 
     Returns:
-        functional: An object that is functionally equivalent to `member`,
+        An object that is functionally equivalent to `member`,
             but which can have its own attributes.
     """
     class_method = isinstance(member, classmethod)
