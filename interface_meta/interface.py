@@ -1,4 +1,8 @@
+from __future__ import annotations
+
 from abc import ABCMeta
+from collections.abc import Callable
+from typing import Any, ClassVar, TypeVar, overload
 
 from .utils.conformance import verify_conformance, verify_not_overridden
 from .utils.docs import update_docs
@@ -10,6 +14,8 @@ from .utils.inspection import (
     should_skip,
 )
 
+_FuncT = TypeVar("_FuncT")
+
 
 class InterfaceMeta(ABCMeta):
     """
@@ -20,11 +26,16 @@ class InterfaceMeta(ABCMeta):
     subclass operations.
     """
 
-    INTERFACE_EXPLICIT_OVERRIDES = True
-    INTERFACE_RAISE_ON_VIOLATION = False
-    INTERFACE_SKIPPED_NAMES = set()  # noqa: RUF012 -- ClassVar annotation added in Phase 3
+    INTERFACE_EXPLICIT_OVERRIDES: ClassVar[bool] = True
+    INTERFACE_RAISE_ON_VIOLATION: ClassVar[bool] = False
+    INTERFACE_SKIPPED_NAMES: ClassVar[set[str]] = set()
 
-    def __init__(cls, name, bases, dct):
+    def __init__(
+        cls,
+        name: str,
+        bases: tuple[type, ...],
+        dct: dict[str, Any],
+    ) -> None:
         ABCMeta.__init__(cls, name, bases, dct)
 
         # Register interface class for subclasses
@@ -32,12 +43,8 @@ class InterfaceMeta(ABCMeta):
             cls.__interface__ = cls
 
         # Read configuration
-        explicit_overrides = cls.__get_config(
-            bases, dct, "INTERFACE_EXPLICIT_OVERRIDES"
-        )
-        raise_on_violation = cls.__get_config(
-            bases, dct, "INTERFACE_RAISE_ON_VIOLATION"
-        )
+        explicit_overrides = cls.__get_config(bases, dct, "INTERFACE_EXPLICIT_OVERRIDES")
+        raise_on_violation = cls.__get_config(bases, dct, "INTERFACE_RAISE_ON_VIOLATION")
         skipped_names = cls.__get_config(bases, dct, "INTERFACE_SKIPPED_NAMES")
 
         # Iterate over names in `dct` and check for conformance to interface
@@ -94,11 +101,16 @@ class InterfaceMeta(ABCMeta):
         # Call subclass registration hook
         cls.__register_implementation__()
 
-    def __register_implementation__(cls):
+    def __register_implementation__(cls) -> None:
         pass
 
     @classmethod
-    def __get_config(mcls, bases, dct, key):
+    def __get_config(
+        mcls,
+        bases: tuple[type, ...],
+        dct: dict[str, Any],
+        key: str,
+    ) -> Any:
         default = getattr(mcls, key, None)
         if bases:
             default = getattr(bases[0], key, default)
@@ -107,15 +119,15 @@ class InterfaceMeta(ABCMeta):
     @classmethod
     def __verify_conformance(
         mcls,
-        key,
-        name,
-        value,
-        base_name,
-        base_value,
-        explicit_overrides=True,
-        raise_on_violation=False,
-    ):
-        return verify_conformance(
+        key: str,
+        name: str,
+        value: object,
+        base_name: str,
+        base_value: object | None,
+        explicit_overrides: bool = True,
+        raise_on_violation: bool = False,
+    ) -> None:
+        verify_conformance(
             key,
             name,
             value,
@@ -126,12 +138,22 @@ class InterfaceMeta(ABCMeta):
         )
 
     @classmethod
-    def __update_docs(mcls, cls, name, bases, dct):
+    def __update_docs(
+        mcls,
+        cls: type,
+        name: str,
+        bases: tuple[type, ...],
+        dct: dict[str, Any],
+    ) -> None:
         skipped_names = mcls.__get_config(bases, dct, "INTERFACE_SKIPPED_NAMES")
-        return update_docs(cls, name, bases, dct, skipped_names=skipped_names)
+        update_docs(cls, name, bases, dct, skipped_names=skipped_names)
 
     @classmethod
-    def inherit_docs(mcls, method=None, mro=True):
+    def inherit_docs(
+        mcls,
+        method: str | None = None,
+        mro: bool = True,
+    ) -> Callable[[_FuncT], _FuncT]:
         """
         Indicate to `InterfaceMeta` how the wrapped method should be documented.
 
@@ -163,7 +185,7 @@ class InterfaceMeta(ABCMeta):
             `_quirks_mro` to the method, for interpretation by `InterfaceMeta`.
         """
 
-        def doc_wrapper(f):
+        def doc_wrapper(f: _FuncT) -> _FuncT:
             set_quirk_docs_method(f, method)
             set_quirk_docs_mro(f, mro)
             return f
@@ -171,7 +193,17 @@ class InterfaceMeta(ABCMeta):
         return doc_wrapper
 
     @classmethod
-    def override(mcls, func=None, force=False):
+    @overload
+    def override(mcls, func: _FuncT, force: bool = ...) -> _FuncT: ...
+    @classmethod
+    @overload
+    def override(mcls, func: None = None, force: bool = ...) -> Callable[[_FuncT], _FuncT]: ...
+    @classmethod
+    def override(
+        mcls,
+        func: _FuncT | None = None,
+        force: bool = False,
+    ) -> _FuncT | Callable[[_FuncT], _FuncT]:
         """
         Indicate to `InterfaceMeta` that this method has intentionally overridden an interface method.
 
@@ -195,11 +227,11 @@ class InterfaceMeta(ABCMeta):
                 arguments are present.
         """
 
-        def override(f):
+        def _override(f: _FuncT) -> _FuncT:
             set_explicit_override(f)
             set_forced_override(f, force)
             return f
 
         if func is not None:
-            return override(func)
-        return override
+            return _override(func)
+        return _override

@@ -29,6 +29,9 @@ jobs:
       - name: Lint
         run: hatch run lint
 
+      - name: Type check
+        run: hatch run typecheck
+
       - name: Run tests
         run: hatch run test-cov
 

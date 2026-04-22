@@ -1,5 +1,6 @@
 import inspect
 import textwrap
+from typing import Any
 
 from .inspection import (
     get_class_attr_docs,
@@ -15,7 +16,13 @@ from .inspection import (
 )
 
 
-def update_docs(cls, name, bases, dct, skipped_names=None):
+def update_docs(
+    cls: type,
+    name: str,
+    bases: tuple[type, ...],
+    dct: dict[str, Any],
+    skipped_names: set[str] | None = None,
+) -> None:
     """
     Update the documentation on class members with information from parents.
 
@@ -33,11 +40,11 @@ def update_docs(cls, name, bases, dct, skipped_names=None):
     """
 
     mro = inspect.getmro(cls)
-    mro = mro[: mro.index(cls.__interface__) + 1]
+    mro = mro[: mro.index(cls.__interface__) + 1]  # type: ignore[attr-defined]
     skipped_names = skipped_names or set()
 
     # Handle module-level documentation
-    module_docs = [cls.__doc__]
+    module_docs: list[Any] = [cls.__doc__]
     for klass in mro:
         if has_class_attr_docs(klass):
             module_docs.append(
@@ -45,14 +52,14 @@ def update_docs(cls, name, bases, dct, skipped_names=None):
                     "Attributes:"
                     if klass is cls
                     else f"Attributes inherited from {klass.__name__}:",
-                    inspect.cleandoc(get_class_attr_docs(klass)),
+                    inspect.cleandoc(get_class_attr_docs(klass) or ""),
                 ]
             )
 
     cls.__doc__ = doc_join(*module_docs)
 
     # Assemble class attribute names avoiding dunder methods
-    members = {}
+    members: dict[str, Any] = {}
     for klass in reversed(cls.mro()):
         members.update(
             {
@@ -80,16 +87,14 @@ def update_docs(cls, name, bases, dct, skipped_names=None):
         if (
             inspect.isabstract(member)
             or has_forced_override(member)
-            or (name in skipped_names
-            and not (has_quirks_mro or quirks_method))
-            or (name not in cls.__dict__
-            and quirks_method is None)
+            or (name in skipped_names and not (has_quirks_mro or quirks_method))
+            or (name not in cls.__dict__ and quirks_method is None)
         ):
             continue
 
         # Extract documentation from this member and the quirks member
-        method_docs = {}
-        last_docs = None
+        method_docs: dict[str, str | None] = {}
+        last_docs: str | None = None
         for i, klass in enumerate(reversed(mro) if quirks_mro else mro[:1]):
             klass_member = klass.__dict__.get(name, None)
             if klass_member is not None:
@@ -105,7 +110,7 @@ def update_docs(cls, name, bases, dct, skipped_names=None):
             if quirk_member_docs:
                 if cls.__name__ in method_docs:
                     method_docs[cls.__name__] = (
-                        inspect.cleandoc(method_docs[cls.__name__])
+                        inspect.cleandoc(method_docs[cls.__name__] or "")
                         + "\n\n"
                         + inspect.cleandoc(quirk_member_docs)
                     )
@@ -115,7 +120,7 @@ def update_docs(cls, name, bases, dct, skipped_names=None):
         if method_docs:
 
             if name not in cls.__dict__:
-                # Overide method object with new object so we don't modify
+                # Override method object with new object so we don't modify
                 # underlying method that may be shared by multiple classes.
                 member = get_functional_wrapper(member)
 
@@ -133,7 +138,7 @@ def update_docs(cls, name, bases, dct, skipped_names=None):
                 setattr(cls, name, member)
 
 
-def doc_join(*docs):
+def doc_join(*docs: Any) -> str | None:
     """
     Stitch multiple pieces of documentation into one docstring.
 
@@ -147,7 +152,7 @@ def doc_join(*docs):
     Returns:
         str: The stitched together docstring.
     """
-    out = []
+    out: list[str] = []
     for doc in docs:
         if doc in (None, ""):
             continue
@@ -163,10 +168,7 @@ def doc_join(*docs):
                 out.append(
                     "{header}\n{body}".format(
                         header=doc[0].strip(),
-                        body="    "
-                        + d.replace(
-                            "\n", "\n    "
-                        ),
+                        body="    " + d.replace("\n", "\n    "),
                     )
                 )
         else:

@@ -1,10 +1,19 @@
+from __future__ import annotations
+
 import warnings
+from collections.abc import Callable
+from typing import TypeVar, overload
 
 from .interface import InterfaceMeta
 from .utils.inspection import set_skip
 
+_FuncT = TypeVar("_FuncT")
 
-def inherit_docs(method=None, mro=True):
+
+def inherit_docs(
+    method: str | None = None,
+    mro: bool = True,
+) -> Callable[[_FuncT], _FuncT]:
     """
     Indicate to `InterfaceMeta` how the wrapped method should be documented.
 
@@ -37,7 +46,10 @@ def inherit_docs(method=None, mro=True):
     return InterfaceMeta.inherit_docs(method=method, mro=mro)
 
 
-def quirk_docs(method=None, mro=True):
+def quirk_docs(
+    method: str | None = None,
+    mro: bool = True,
+) -> Callable[[_FuncT], _FuncT]:
     """
     DEPRECATED: Please use `inherit_docs` instead.
     """
@@ -50,7 +62,17 @@ def quirk_docs(method=None, mro=True):
     return inherit_docs(method=method, mro=mro)
 
 
-def override(func=None, force=False, f=None):
+@overload
+def override(func: _FuncT, force: bool = ..., f: None = ...) -> _FuncT: ...
+@overload
+def override(func: None = ..., force: bool = ..., f: None = ...) -> Callable[[_FuncT], _FuncT]: ...
+@overload
+def override(func: None = ..., force: bool = ..., f: _FuncT = ...) -> _FuncT: ...
+def override(
+    func: _FuncT | None = None,
+    force: bool = False,
+    f: _FuncT | None = None,
+) -> _FuncT | Callable[[_FuncT], _FuncT]:
     """
     Indicate to `InterfaceMeta` that this method has intentionally overridden an interface method.
 
@@ -81,10 +103,13 @@ def override(func=None, force=False, f=None):
             DeprecationWarning,
             stacklevel=2,
         )
-    return InterfaceMeta.override(func=func or f, force=force)
+    actual: _FuncT | None = func if func is not None else f
+    if actual is not None:
+        return InterfaceMeta.override(func=actual, force=force)
+    return InterfaceMeta.override(force=force)
 
 
-def skip(func):
+def skip(func: _FuncT) -> _FuncT:
     """
     Indicate to `InterfaceMeta` that this method should be skipped.
 

@@ -3,7 +3,7 @@ import logging
 from .errors import InterfaceConformanceError
 
 
-def report_violation(message, raise_on_violation):
+def report_violation(message: str, raise_on_violation: bool) -> None:
     """
     Report a violation in conformance to the user.
 

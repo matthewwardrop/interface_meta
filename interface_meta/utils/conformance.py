@@ -1,6 +1,6 @@
 import inspect
 import logging
-from inspect import Parameter
+from inspect import Parameter, Signature
 
 from .inspection import (
     get_functional_signature,
@@ -14,14 +14,14 @@ from .reporting import report_violation
 
 
 def verify_conformance(
-    name,
-    clsname,
-    member,
-    ref_clsname,
-    ref_member,
-    explicit_overrides=True,
-    raise_on_violation=False,
-):
+    name: str,
+    clsname: str,
+    member: object,
+    ref_clsname: str,
+    ref_member: object | None,
+    explicit_overrides: bool = True,
+    raise_on_violation: bool = False,
+) -> None:
     """
     Verify that a member conforms to a nominated interface.
 
@@ -44,7 +44,7 @@ def verify_conformance(
     ):  # pragma: no cover; Method is attached to metaclass, so should not be checked.
         return
 
-    if has_forced_override(member) or should_skip(ref_member):
+    if ref_member is None or has_forced_override(member) or should_skip(ref_member):
         return
 
     # Check that type of member has not changed.
@@ -86,8 +86,13 @@ def verify_conformance(
 
 
 def verify_signature(
-    name, clsname, member, ref_clsname, ref_member, raise_on_violation=False
-):
+    name: str,
+    clsname: str,
+    member: object,
+    ref_clsname: str,
+    ref_member: object,
+    raise_on_violation: bool = False,
+) -> None:
     """
     Verify that the signature of a member is compatible with some reference member.
 
@@ -114,7 +119,7 @@ def verify_signature(
             logging.warning(message)
 
 
-def check_signatures_compatible(sig, ref_sig):
+def check_signatures_compatible(sig: Signature, ref_sig: Signature) -> bool:
     """
     Check whether two signatures are compatible.
 
@@ -156,15 +161,22 @@ def check_signatures_compatible(sig, ref_sig):
     for param in params:
         if (
             param.kind is Parameter.POSITIONAL_ONLY
-            or (param.kind is Parameter.POSITIONAL_OR_KEYWORD
-            and param.default is Parameter.empty)
+            or (
+                param.kind is Parameter.POSITIONAL_OR_KEYWORD
+                and param.default is Parameter.empty
+            )
         ):
             return False
 
     return True
 
 
-def verify_not_overridden(name, clsname, member, raise_on_violation=False):
+def verify_not_overridden(
+    name: str,
+    clsname: str,
+    member: object,
+    raise_on_violation: bool = False,
+) -> None:
     """
     Verify that a nominated member is *not* an override.
 
