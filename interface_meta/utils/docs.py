@@ -71,10 +71,6 @@ def update_docs(
     # Handle function/method-level documentation
     for name, member in members.items():
 
-        # Skip magic methods
-        if name.startswith("__") and name.endswith("__"):
-            continue
-
         # Check if there is anything to do
         if not has_updatable_docs(member):
             continue

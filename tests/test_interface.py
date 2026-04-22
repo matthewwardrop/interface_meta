@@ -1,3 +1,5 @@
+import pytest
+
 from interface_meta import InterfaceMeta
 
 
@@ -84,6 +86,30 @@ def test_consistency():
     for key, value in Base.__dict__.items():
         if key in SubBase.__dict__:
             assert issubclass(type(value), type(SubBase.__dict__[key]))
+
+
+def test_annotation_only_attribute_override():
+    class Base(metaclass=InterfaceMeta):
+        x: int  # annotation only, no value
+
+    class Child(Base):
+        x = 42
+
+    assert Child.x == 42
+
+
+def test_raise_on_violation():
+    with pytest.raises(RuntimeError):
+
+        class Base(metaclass=InterfaceMeta):
+            INTERFACE_RAISE_ON_VIOLATION = True
+
+            def method(self, a):
+                pass
+
+        class Child(Base):
+            def method(self, a, b):  # extra required arg: signature mismatch
+                pass
 
 
 def test_docstrings():

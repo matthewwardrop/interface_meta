@@ -22,6 +22,8 @@ from interface_meta.utils.inspection import (
     set_functional_docs,
     set_quirk_docs_method,
     set_quirk_docs_mro,
+    set_skip,
+    should_skip,
     signature,
 )
 
@@ -197,3 +199,20 @@ def test_set_functional_docs():
 
     assert get_functional_docs(PROPERTY, orig=True) == "Property Docs"
     assert get_functional_docs(PROPERTY, orig=False) == "New Docs"
+
+
+def test__get_member_bound_method():
+    # inspect.ismethod is True for bound methods; _get_member should return __func__
+    bound = Test().method
+    assert is_method(_get_member(bound))
+
+
+def test_skip():
+    def my_method(self):
+        pass
+
+    assert not should_skip(my_method)
+    set_skip(my_method)
+    assert should_skip(my_method)
+    set_skip(my_method, False)
+    assert not should_skip(my_method)
