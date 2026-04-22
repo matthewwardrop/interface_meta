@@ -103,5 +103,8 @@ venv.bak/
 # mypy
 .mypy_cache/
 
+# hatch-vcs generated version file
+interface_meta/_version.py
+
 # VS Code
 .vscode
