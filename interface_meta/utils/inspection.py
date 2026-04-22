@@ -1,17 +1,6 @@
 import functools
 import inspect
-from abc import abstractproperty
-
-try:
-    from abc import abstractclassmethod, abstractstaticmethod
-except ImportError:  # pragma: no cover
-    abstractclassmethod = classmethod
-    abstractstaticmethod = staticmethod
-
-try:
-    from inspect import signature
-except ImportError:  # pragma: no cover
-    from funcsigs import signature
+from inspect import signature
 
 
 # Abstract away differences between functions, methods and descriptors
@@ -20,14 +9,12 @@ except ImportError:  # pragma: no cover
 def _get_member(member):
     if inspect.ismethod(member):
         return member.__func__
-    if inspect.isdatadescriptor(member) and isinstance(
-        member, (property, abstractproperty)
-    ):
+    if inspect.isdatadescriptor(member) and isinstance(member, property):
         return member.fget
     if inspect.ismethoddescriptor(member):
-        if isinstance(member, (classmethod, abstractclassmethod)):
+        if isinstance(member, classmethod):
             return member.__get__(object, object).__func__
-        if isinstance(member, (staticmethod, abstractstaticmethod)):
+        if isinstance(member, staticmethod):
             return member.__get__(object, object)
     return member
 
@@ -152,7 +139,7 @@ def has_updatable_docs(member):
     return (
         is_functional_member(member)
         or inspect.isdatadescriptor(member)
-        and isinstance(member, (property, abstractproperty))
+        and isinstance(member, property)
     )
 
 

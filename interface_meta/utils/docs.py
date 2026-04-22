@@ -1,6 +1,5 @@
 import inspect
 import textwrap
-from collections import OrderedDict
 
 from .inspection import (
     get_class_attr_docs,
@@ -89,7 +88,7 @@ def update_docs(cls, name, bases, dct, skipped_names=None):
             continue
 
         # Extract documentation from this member and the quirks member
-        method_docs = OrderedDict()
+        method_docs = {}
         last_docs = None
         for i, klass in enumerate(reversed(mro) if quirks_mro else mro[:1]):
             klass_member = klass.__dict__.get(name, None)
@@ -167,7 +166,7 @@ def doc_join(*docs):
                         body="    "
                         + d.replace(
                             "\n", "\n    "
-                        ),  # textwrap.indent not available in python2
+                        ),
                     )
                 )
         else:

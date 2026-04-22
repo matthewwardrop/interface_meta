@@ -1,39 +1,57 @@
-[tool.poetry]
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[project]
 name = "interface_meta"
-version = "0.0.0"
+dynamic = ["version"]
 description = "`interface_meta` provides a convenient way to expose an extensible API with enforced method signatures and consistent documentation."
-authors = ["Matthew Wardrop <mpwardrop@gmail.com>"]
-license = "MIT"
 readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "Matthew Wardrop", email = "mpwardrop@gmail.com" }]
+requires-python = ">=3.10"
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Environment :: Console",
-    "Intended Audience :: Developers"
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
 ]
 
-include = [
-    { path = "tests", format = "sdist" },
-    { path = ".flake8", format = "sdist" },
-    { path = "tox.ini", format = "sdist" },
-    { path = "poetry.lock", format = "sdist" },
+[project.urls]
+Homepage = "https://github.com/matthewwardrop/interface_meta"
+Repository = "https://github.com/matthewwardrop/interface_meta"
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.build.hooks.vcs]
+version-file = "interface_meta/_version.py"
+
+[tool.hatch.build.targets.sdist]
+include = ["interface_meta/", "tests/"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["interface_meta"]
+
+[tool.hatch.envs.default]
+dependencies = [
+    "pytest==9.0.3",
+    "pytest-cov==7.1.0",
+    "ruff==0.15.11",
+    "mypy==1.20.1",
 ]
 
-[tool.poetry-dynamic-versioning]
-enable = true
+[tool.hatch.envs.default.scripts]
+test      = "pytest {args} tests/"
+test-cov  = "pytest --cov=interface_meta --cov-report=xml {args} tests/"
+lint      = "ruff check interface_meta tests"
+format    = "ruff format interface_meta tests"
+typecheck = "mypy interface_meta"
+check     = ["lint", "format", "typecheck", "test"]
 
-[tool.poetry.build]
-generate-setup-file = false
-
-[tool.poetry.dependencies]
-python = "^3.7"
-
-[tool.poetry.dev-dependencies]
-black = "^22.3.0"
-flake8 = "^4.0.1"
-pytest = "^7.1.1"
-pytest-cov = "^3.0.0"
-tox = "^3.24.5"
-
-[build-system]
-requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning"]
-build-backend = "poetry.core.masonry.api"
+[tool.pytest.ini_options]
+testpaths = ["tests"]

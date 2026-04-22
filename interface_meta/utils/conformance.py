@@ -1,6 +1,5 @@
 import inspect
 import logging
-from abc import abstractproperty
 from inspect import Parameter
 
 from .inspection import (
@@ -50,7 +49,7 @@ def verify_conformance(
 
     # Check that type of member has not changed.
     if type(member) is not type(ref_member):
-        if type(member) in (abstractproperty, property) and not is_method(ref_member):
+        if isinstance(member, property) and not is_method(ref_member):
             # This should be okay, provided the property is properly crafted.
             pass
         elif is_functional_member(member):
