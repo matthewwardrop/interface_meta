@@ -3,9 +3,9 @@
 [![PyPI - Version](https://img.shields.io/pypi/v/interface_meta.svg)](https://pypi.org/project/interface_meta/)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/interface_meta.svg)
 ![PyPI - Status](https://img.shields.io/pypi/status/interface_meta.svg)
-[![build](https://img.shields.io/github/workflow/status/matthewwardrop/interface_meta/Run%20Tox%20Tests)](https://github.com/matthewwardrop/interface_meta/actions?query=workflow%3A%22Run+Tox+Tests%22)
+[![CI](https://github.com/matthewwardrop/interface_meta/actions/workflows/ci.yml/badge.svg)](https://github.com/matthewwardrop/interface_meta/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/matthewwardrop/interface_meta/branch/master/graph/badge.svg?token=W4LD72EQMM)](https://codecov.io/gh/matthewwardrop/interface_meta)
-[![Code Style](https://img.shields.io/badge/code%20style-black-black)](https://github.com/psf/black)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 
 `interface_meta` provides a convenient way to expose an extensible API with
 enforced method signatures and consistent documentation.
@@ -45,8 +45,9 @@ such, this library boasts the following features:
 ## Example code
 
 ```python
-from abc import abstractmethod, abstractproperty
-from interface_meta import InterfaceMeta, override, quirk_docs
+from abc import abstractmethod
+from interface_meta import InterfaceMeta, inherit_docs, override
+
 
 class MyInterface(metaclass=InterfaceMeta):
     """
@@ -55,22 +56,15 @@ class MyInterface(metaclass=InterfaceMeta):
 
     INTERFACE_EXPLICIT_OVERRIDES = True
     INTERFACE_RAISE_ON_VIOLATION = False
-    INTERFACE_SKIPPED_NAMES = {'__init__'}
 
-    def __init__(self):
-        """
-        MyInterface constructor.
-        """
-        pass
-
-    @abstractproperty
-    def name(self):
+    @property
+    @abstractmethod
+    def name(self) -> str:
         """
         The name of this interface.
         """
-        pass
 
-    @quirk_docs(method='_do_stuff')
+    @inherit_docs(method="_do_stuff")
     def do_stuff(self, a, b, c=1):
         """
         Do things with the parameters.
@@ -81,27 +75,15 @@ class MyInterface(metaclass=InterfaceMeta):
     def _do_stuff(self, a, b, c):
         pass
 
+
 class MyImplementation(MyInterface):
     """
     This implementation of the example interface works nicely.
     """
 
-    @quirk_docs(method='_init', mro=False)
-    def __init__(self, a):
-        """
-        MyImplementation constructor.
-        """
-        self._init(a)
-
-    def _init(self, a):
-        """
-        In this instance, we do nothing with a.
-        """
-        pass
-
-    @property
     @override
-    def name(self):
+    @property
+    def name(self) -> str:
         return "Peter"
 
     @override
@@ -122,13 +104,6 @@ class MyImplementation(MyInterface)
  |      MyImplementation
  |      MyInterface
  |      builtins.object
- |
- |  Methods defined here:
- |
- |  __init__(self, a)
- |      MyImplementation constructor.
- |
- |      In this instance, we do nothing with a.
  |
  |  do_stuff(self, a, b, c=1)
  |      Do things with the parameters.
