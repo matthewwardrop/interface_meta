@@ -56,9 +56,7 @@ def verify_conformance(
             # This means we are replacing a fixed attribute with a method,
             # or between different types of functional members
             report_violation(
-                "`{}.{}` changes the type of `{}.{}` (`{}` instead of `{}`) without using `@override(force=True)` decorator.".format(
-                    clsname, name, ref_clsname, name, type(member), type(ref_member)
-                ),
+                f"`{clsname}.{name}` changes the type of `{ref_clsname}.{name}` (`{type(member)}` instead of `{type(ref_member)}`) without using `@override(force=True)` decorator.",
                 raise_on_violation,
             )
         else:  # Most other type changes should be fine
@@ -72,9 +70,7 @@ def verify_conformance(
     ):
         if explicit_overrides and not has_explicit_override(member):
             report_violation(
-                "`{}.{}` overrides interface `{}.{}` without using the `@override` decorator.".format(
-                    clsname, name, ref_clsname, name
-                ),
+                f"`{clsname}.{name}` overrides interface `{ref_clsname}.{name}` without using the `@override` decorator.",
                 raise_on_violation,
             )
 
@@ -111,9 +107,7 @@ def verify_signature(
     ref_sig = get_functional_signature(ref_member)
 
     if not check_signatures_compatible(sig, ref_sig):
-        message = "Signature `{}.{}{}` does not conform to interface `{}.{}{}`.".format(
-            clsname, name, sig, ref_clsname, name, ref_sig
-        )
+        message = f"Signature `{clsname}.{name}{sig}` does not conform to interface `{ref_clsname}.{name}{ref_sig}`."
         if raise_on_violation:
             raise RuntimeError(message)
         else:
@@ -162,8 +156,8 @@ def check_signatures_compatible(sig, ref_sig):
     for param in params:
         if (
             param.kind is Parameter.POSITIONAL_ONLY
-            or param.kind is Parameter.POSITIONAL_OR_KEYWORD
-            and param.default == inspect._empty
+            or (param.kind is Parameter.POSITIONAL_OR_KEYWORD
+            and param.default is Parameter.empty)
         ):
             return False
 
@@ -184,8 +178,6 @@ def verify_not_overridden(name, clsname, member, raise_on_violation=False):
     """
     if has_explicit_override(member):
         report_violation(
-            "`{clsname}.{name}` claims to override interface method, but no such method exists.".format(
-                clsname=clsname, name=name
-            ),
+            f"`{clsname}.{name}` claims to override interface method, but no such method exists.",
             raise_on_violation=raise_on_violation,
         )

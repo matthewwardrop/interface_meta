@@ -22,7 +22,7 @@ class InterfaceMeta(ABCMeta):
 
     INTERFACE_EXPLICIT_OVERRIDES = True
     INTERFACE_RAISE_ON_VIOLATION = False
-    INTERFACE_SKIPPED_NAMES = set()
+    INTERFACE_SKIPPED_NAMES = set()  # noqa: RUF012 -- ClassVar annotation added in Phase 3
 
     def __init__(cls, name, bases, dct):
         ABCMeta.__init__(cls, name, bases, dct)

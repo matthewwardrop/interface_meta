@@ -2,7 +2,6 @@ import functools
 import inspect
 from inspect import signature
 
-
 # Abstract away differences between functions, methods and descriptors
 
 
@@ -138,8 +137,8 @@ def set_skip(member, skip=True):
 def has_updatable_docs(member):
     return (
         is_functional_member(member)
-        or inspect.isdatadescriptor(member)
-        and isinstance(member, property)
+        or (inspect.isdatadescriptor(member)
+        and isinstance(member, property))
     )
 
 
@@ -158,11 +157,11 @@ def set_functional_docs(member, docs):
 
 
 def has_class_attr_docs(cls):
-    return hasattr(cls, "_{}__doc_attrs".format(cls.__name__))
+    return hasattr(cls, f"_{cls.__name__}__doc_attrs")
 
 
 def get_class_attr_docs(cls):
-    return getattr(cls, "_{}__doc_attrs".format(cls.__name__))
+    return getattr(cls, f"_{cls.__name__}__doc_attrs")
 
 
 # Quirk documentation helpers

@@ -44,7 +44,7 @@ def update_docs(cls, name, bases, dct, skipped_names=None):
                 [
                     "Attributes:"
                     if klass is cls
-                    else "Attributes inherited from {}:".format(klass.__name__),
+                    else f"Attributes inherited from {klass.__name__}:",
                     inspect.cleandoc(get_class_attr_docs(klass)),
                 ]
             )
@@ -80,10 +80,10 @@ def update_docs(cls, name, bases, dct, skipped_names=None):
         if (
             inspect.isabstract(member)
             or has_forced_override(member)
-            or name in skipped_names
-            and not (has_quirks_mro or quirks_method)
-            or name not in cls.__dict__
-            and quirks_method is None
+            or (name in skipped_names
+            and not (has_quirks_mro or quirks_method))
+            or (name not in cls.__dict__
+            and quirks_method is None)
         ):
             continue
 
@@ -170,5 +170,5 @@ def doc_join(*docs):
                     )
                 )
         else:
-            raise ValueError("Unrecognised doc format: {}".format(type(doc)))
+            raise ValueError(f"Unrecognised doc format: {type(doc)}")
     return "\n\n".join(out) or None
