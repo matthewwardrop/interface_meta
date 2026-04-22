@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import warnings
 from collections.abc import Callable
 from typing import TypeVar, overload
 
@@ -46,32 +45,13 @@ def inherit_docs(
     return InterfaceMeta.inherit_docs(method=method, mro=mro)
 
 
-def quirk_docs(
-    method: str | None = None,
-    mro: bool = True,
-) -> Callable[[_FuncT], _FuncT]:
-    """
-    DEPRECATED: Please use `inherit_docs` instead.
-    """
-    warnings.warn(
-        "The `interface_meta.quirk_docs` decorator has been replaced by `implemented_by` and "
-        "will be removed in version 2.0.",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    return inherit_docs(method=method, mro=mro)
-
-
 @overload
-def override(func: _FuncT, force: bool = ..., f: None = ...) -> _FuncT: ...
+def override(func: _FuncT, force: bool = ...) -> _FuncT: ...
 @overload
-def override(func: None = ..., force: bool = ..., f: None = ...) -> Callable[[_FuncT], _FuncT]: ...
-@overload
-def override(func: None = ..., force: bool = ..., f: _FuncT = ...) -> _FuncT: ...
+def override(func: None = None, force: bool = ...) -> Callable[[_FuncT], _FuncT]: ...
 def override(
     func: _FuncT | None = None,
     force: bool = False,
-    f: _FuncT | None = None,
 ) -> _FuncT | Callable[[_FuncT], _FuncT]:
     """
     Indicate to `InterfaceMeta` that this method has intentionally overridden an interface method.
@@ -89,23 +69,13 @@ def override(
         force (bool): Whether to force override of method even if the API does
             note match. Note that in this case, documentation is not inherited
             from the MRO.
-        f (function, None): Deprecated predecessor of `func`. Maintained for
-            backward compatibility until v2.0.
 
     Returns:
         function: The wrapped function of function wrapper depending on which
             arguments are present.
     """
-    if f is not None:
-        warnings.warn(
-            "The `f` argument to the `interface_meta.override` decorator has been renamed `func`. This "
-            "backward compatibility shim will be removed in 2.0.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-    actual: _FuncT | None = func if func is not None else f
-    if actual is not None:
-        return InterfaceMeta.override(func=actual, force=force)
+    if func is not None:
+        return InterfaceMeta.override(func=func, force=force)
     return InterfaceMeta.override(force=force)
 
 
