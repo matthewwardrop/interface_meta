@@ -39,8 +39,10 @@ class InterfaceMeta(ABCMeta):
         name: str,
         bases: tuple[type, ...],
         dct: dict[str, Any],
+        /,
+        **kwargs: Any,
     ) -> None:
-        ABCMeta.__init__(cls, name, bases, dct)
+        ABCMeta.__init__(cls, name, bases, dct, **kwargs)
 
         # Register interface class for subclasses
         if not hasattr(cls, "__interface__"):
@@ -53,7 +55,6 @@ class InterfaceMeta(ABCMeta):
 
         # Iterate over names in `dct` and check for conformance to interface
         for key, value in dct.items():
-
             # Skip any key corresponding to Python magic methods
             if key.startswith("__") and key.endswith("__"):
                 continue
@@ -79,9 +80,7 @@ class InterfaceMeta(ABCMeta):
                         raise_on_violation=raise_on_violation,
                     )
                     break
-                if key in getattr(
-                    base, "__annotations__", {}
-                ):  # Declared but as yet unspecified attributes
+                if key in getattr(base, "__annotations__", {}):  # Declared but as yet unspecified attributes
                     is_override = True
                     cls.__verify_conformance(
                         key,
@@ -95,9 +94,7 @@ class InterfaceMeta(ABCMeta):
                     break
 
             if not is_override:
-                verify_not_overridden(
-                    key, name, value, raise_on_violation=raise_on_violation
-                )
+                verify_not_overridden(key, name, value, raise_on_violation=raise_on_violation)
 
         # Update documentation
         cls.__update_docs(cls, name, bases, dct)

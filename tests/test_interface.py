@@ -113,23 +113,11 @@ def test_raise_on_violation():
 
 
 def test_docstrings():
-    assert (
-        SubBase.__doc__
-        == "SubBase class\n\nAttributes inherited from Base:\n    ATTRIBUTE (str): An attribute."
-    )
+    assert SubBase.__doc__ == "SubBase class\n\nAttributes inherited from Base:\n    ATTRIBUTE (str): An attribute."
     assert SubBase.__init__.__doc__ == "Subclass Constructor"
     assert SubBase.property_method.__doc__ == "Property Method"
-    assert (
-        SubBase.regular_method.__doc__
-        == "Regular Method\n\nSubBase Quirks:\n    Subclass Regular Method"
-    )
-    assert (
-        SubBase.static_method.__doc__
-        == "Static Method\n\nSubBase Quirks:\n    Subclass Static Method"
-    )
+    assert SubBase.regular_method.__doc__ == "Regular Method\n\nSubBase Quirks:\n    Subclass Regular Method"
+    assert SubBase.static_method.__doc__ == "Static Method\n\nSubBase Quirks:\n    Subclass Static Method"
     assert SubBase.class_method.__doc__ == "Subclass Class Method"
-    assert (
-        SubBase.split_method.__doc__
-        == "Split Method\n\nSubBase Quirks:\n    Subclass split_method quirks"
-    )
+    assert SubBase.split_method.__doc__ == "Split Method\n\nSubBase Quirks:\n    Subclass split_method quirks"
     assert SubBase.mro_documented.__doc__ == "Documentation in SubBase"

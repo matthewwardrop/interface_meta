@@ -35,9 +35,7 @@ def verify_conformance(
         raise_on_violation: Whether any non-conformance should cause an
             exception to be raised. (default: False)
     """
-    if hasattr(
-        ref_member, "__objclass__"
-    ):  # pragma: no cover; Method is attached to metaclass, so should not be checked.
+    if hasattr(ref_member, "__objclass__"):  # pragma: no cover; Method is attached to metaclass, so should not be checked.
         return
 
     if ref_member is None or has_forced_override(member) or should_skip(ref_member):
@@ -59,11 +57,7 @@ def verify_conformance(
             pass
 
     # Check that overrides are present
-    if (
-        is_functional_member(member)
-        or inspect.isdatadescriptor(member)
-        or inspect.ismethoddescriptor(member)
-    ):
+    if is_functional_member(member) or inspect.isdatadescriptor(member) or inspect.ismethoddescriptor(member):
         if explicit_overrides and not has_explicit_override(member):
             report_violation(
                 f"`{clsname}.{name}` overrides interface `{ref_clsname}.{name}` without using the `@override` decorator.",
@@ -130,34 +124,20 @@ def check_signatures_compatible(sig: Signature, ref_sig: Signature) -> bool:
         for bp in base_params:
             cp = next(params)
 
-            while (
-                bp.kind is Parameter.VAR_POSITIONAL
-                and cp.kind is Parameter.POSITIONAL_OR_KEYWORD
-            ):
+            while bp.kind is Parameter.VAR_POSITIONAL and cp.kind is Parameter.POSITIONAL_OR_KEYWORD:
                 cp = next(params)
 
-            while (
-                bp.kind is Parameter.VAR_KEYWORD
-                and cp.kind is not Parameter.VAR_KEYWORD
-            ):
+            while bp.kind is Parameter.VAR_KEYWORD and cp.kind is not Parameter.VAR_KEYWORD:
                 cp = next(params)
 
-            if not (
-                cp.name == bp.name and bp.kind == cp.kind and bp.default == cp.default
-            ):
+            if not (cp.name == bp.name and bp.kind == cp.kind and bp.default == cp.default):
                 raise ValueError(bp, cp)
 
     except (StopIteration, ValueError):
         return False
 
     for param in params:
-        if (
-            param.kind is Parameter.POSITIONAL_ONLY
-            or (
-                param.kind is Parameter.POSITIONAL_OR_KEYWORD
-                and param.default is Parameter.empty
-            )
-        ):
+        if param.kind is Parameter.POSITIONAL_ONLY or (param.kind is Parameter.POSITIONAL_OR_KEYWORD and param.default is Parameter.empty):
             return False
 
     return True
