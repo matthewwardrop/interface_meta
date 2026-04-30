@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from abc import ABCMeta
 from collections.abc import Callable
-from typing import Any, ClassVar, TypeVar, overload
+from typing import Any, TypeVar, overload
 
 from .utils.conformance import verify_conformance, verify_not_overridden
 from .utils.docs import update_docs
@@ -26,9 +26,13 @@ class InterfaceMeta(ABCMeta):
     subclass operations.
     """
 
-    INTERFACE_EXPLICIT_OVERRIDES: ClassVar[bool] = True
-    INTERFACE_RAISE_ON_VIOLATION: ClassVar[bool] = False
-    INTERFACE_SKIPPED_NAMES: ClassVar[set[str]] = set()
+    # DO NOT ADD TYPES TO THESE CLASS VARS!
+    # This causes derived classes to not have "__annotations__" set to the
+    # empty dictionary when they do not explicitly define any annotations, which
+    # breaks the standard Python convention. This is an interaction with `type`.
+    INTERFACE_EXPLICIT_OVERRIDES = True
+    INTERFACE_RAISE_ON_VIOLATION = False
+    INTERFACE_SKIPPED_NAMES = set()  # type: ignore  # noqa: RUF012
 
     def __init__(
         cls,
