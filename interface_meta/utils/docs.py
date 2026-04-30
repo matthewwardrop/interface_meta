@@ -48,9 +48,7 @@ def update_docs(
         if has_class_attr_docs(klass):
             module_docs.append(
                 [
-                    "Attributes:"
-                    if klass is cls
-                    else f"Attributes inherited from {klass.__name__}:",
+                    "Attributes:" if klass is cls else f"Attributes inherited from {klass.__name__}:",
                     inspect.cleandoc(get_class_attr_docs(klass) or ""),
                 ]
             )
@@ -60,17 +58,10 @@ def update_docs(
     # Assemble class attribute names avoiding dunder methods
     members: dict[str, Any] = {}
     for klass in reversed(cls.mro()):
-        members.update(
-            {
-                name: member
-                for name, member in klass.__dict__.items()
-                if not name.startswith("__") and not name.endswith("__")
-            }
-        )
+        members.update({name: member for name, member in klass.__dict__.items() if not name.startswith("__") and not name.endswith("__")})
 
     # Handle function/method-level documentation
     for name, member in members.items():
-
         # Check if there is anything to do
         if not has_updatable_docs(member):
             continue
@@ -104,16 +95,11 @@ def update_docs(
             quirk_member_docs = get_functional_docs(quirk_member)
             if quirk_member_docs:
                 if cls.__name__ in method_docs:
-                    method_docs[cls.__name__] = (
-                        inspect.cleandoc(method_docs[cls.__name__] or "")
-                        + "\n\n"
-                        + inspect.cleandoc(quirk_member_docs)
-                    )
+                    method_docs[cls.__name__] = inspect.cleandoc(method_docs[cls.__name__] or "") + "\n\n" + inspect.cleandoc(quirk_member_docs)
                 else:
                     method_docs[cls.__name__] = quirk_member_docs
 
         if method_docs:
-
             if name not in cls.__dict__:
                 # Override method object with new object so we don't modify
                 # underlying method that may be shared by multiple classes.
@@ -121,12 +107,7 @@ def update_docs(
 
             set_functional_docs(
                 member,
-                doc_join(
-                    *[
-                        docs if i == 0 else [source + " Quirks:", docs]
-                        for i, (source, docs) in enumerate(method_docs.items())
-                    ]
-                ),
+                doc_join(*[docs if i == 0 else [source + " Quirks:", docs] for i, (source, docs) in enumerate(method_docs.items())]),
             )
 
             if name not in cls.__dict__:

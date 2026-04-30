@@ -29,7 +29,6 @@ from interface_meta.utils.inspection import (
 
 
 class Test:
-
     __doc_attrs = "Documented attributes"
 
     attribute = False
@@ -110,9 +109,7 @@ def test_get_functional_wrapper():
             "__override_force__",
         ]:
             if functional_hasattr(functional, attr):
-                assert functional_getattr(wrapped, attr) == functional_getattr(
-                    functional, attr
-                )
+                assert functional_getattr(wrapped, attr) == functional_getattr(functional, attr)
 
         if functional is PROPERTY:
             assert wrapped.fset is PROPERTY.fset
@@ -121,12 +118,8 @@ def test_get_functional_wrapper():
 
 def test_get_functional_signature():
     assert get_functional_signature(METHOD) == signature(METHOD)
-    assert get_functional_signature(CLASS_METHOD) == signature(
-        CLASS_METHOD.__get__(object, object).__func__
-    )
-    assert get_functional_signature(STATIC_METHOD) == signature(
-        STATIC_METHOD.__get__(object, object)
-    )
+    assert get_functional_signature(CLASS_METHOD) == signature(CLASS_METHOD.__get__(object, object).__func__)
+    assert get_functional_signature(STATIC_METHOD) == signature(STATIC_METHOD.__get__(object, object))
 
 
 def test_functional_attrs():

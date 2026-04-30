@@ -41,10 +41,7 @@ def is_functional_member(member: object) -> bool:
     Returns:
         `True` if the member is a function (or acts like one).
     """
-    return inspect.isfunction(member) or (
-        inspect.ismethoddescriptor(member)
-        and isinstance(member, (classmethod, staticmethod))
-    )
+    return inspect.isfunction(member) or (inspect.ismethoddescriptor(member) and isinstance(member, (classmethod, staticmethod)))
 
 
 def get_functional_signature(member: object) -> inspect.Signature:
@@ -149,9 +146,7 @@ def set_skip(member: object, skip: bool = True) -> None:
 
 
 def has_updatable_docs(member: object) -> bool:
-    return is_functional_member(member) or (
-        inspect.isdatadescriptor(member) and isinstance(member, property)
-    )
+    return is_functional_member(member) or (inspect.isdatadescriptor(member) and isinstance(member, property))
 
 
 def get_functional_docs(member: object, orig: bool = True) -> str | None:
